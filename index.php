@@ -38,8 +38,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $userid = $_POST['userid'];
         $pass = $_POST['password'];
 
-        echo "Result:".$userid." ".$pass." ".$role;
-        header('Location: ../add.php');
+        //echo "Result:".$userid." ".$pass." ".$role;
+        header("Location: ./patient/view.php?ptId=$userid");
     }
 }
 ?>

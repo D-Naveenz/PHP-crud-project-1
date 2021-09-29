@@ -52,19 +52,19 @@ $(document).ready(() => {
 
     $('#btnPatient').click(() => {
         role = "Patient";
-        $('.avatar img').attr('src', '/res/guest.png');
+        $('.avatar img').attr('src', './res/guest.png');
         changeModal();
     });
 
     $('#btnStaff').click(() => {
         role = "Staff";
-        $('.avatar img').attr('src', '/res/staff.png');
+        $('.avatar img').attr('src', './res/staff.png');
         changeModal();
     });
 
     $('#btnAdmin').click(() => {
         role = "Administrator";
-        $('.avatar img').attr('src', '/res/admin.png');
+        $('.avatar img').attr('src', './res/admin.png');
         changeModal();
     });
 })
