@@ -1,3 +1,16 @@
+<?php
+include "core/config.php";
+
+// start the session
+session_start();
+// generate session variables to locate the current page
+/*$url = basename($_SERVER['PHP_SELF']);
+$query = $_SERVER['QUERY_STRING'];
+if($query){
+    $url .= "?".$query;
+}
+$_SESSION['current_page'] = $url;*/
+?>
 <!doctype html>
 <html lang="en">
 <head>
@@ -27,8 +40,6 @@
 </head>
 <body>
 <?php
-include "core/config.php";
-
 // define variables and set to empty values
 $role = $userid = $pass = "";
 
@@ -38,8 +49,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $userid = $_POST['userid'];
         $pass = $_POST['password'];
 
-        //echo "Result:".$userid." ".$pass." ".$role;
-        header("Location: ./patient/view.php?ptId=$userid");
+        //header("Location: ./patient/view.php?ptId=$userid");
+        header("Location: ./patient/add.php");
     }
 }
 ?>

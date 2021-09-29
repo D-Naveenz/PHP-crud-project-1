@@ -95,16 +95,20 @@ class Patient
         return $this->exists_in_db;
     }
 
-    public static function getInstance($patient_id = ""): Patient
+    public static function getInstance(bool $check_instance, $patient_id = ""): Patient
     {
-        // get instance from the cookie
-        if (isset($_COOKIE[self::cookie_name])) {
-            $obj = unserialize($_COOKIE[self::cookie_name]);
-            if ($obj) {
-                $obj->has_instance = true;
-                return $obj;
+        if ($check_instance) {
+            // get instance from the cookie
+            if (isset($_COOKIE[self::cookie_name])) {
+                $obj = unserialize($_COOKIE[self::cookie_name]);
+                if ($obj) {
+                    $obj->has_instance = true;
+                    return $obj;
+                }
             }
         }
+        // forcing destroy the cookie for get rid of errors
+        self::destroyInstance();
         return new Patient(false, $patient_id);
     }
 
@@ -126,7 +130,7 @@ class Patient
         if ($result->num_rows == 1) {
             return $result->fetch_assoc();
         }
-        else if ($result->num_rows > 1) {
+        elseif ($result->num_rows > 1) {
             die("Patient table has many results with the same id: $patient_id! | rows: $result->num_rows");
         }
         return null;

@@ -26,18 +26,19 @@ session_start();
 
     <?php
     // Get requests
-    if ($_SERVER["REQUEST_METHOD"] == "GET") {
-        // Check whether patient id is in the address
-        if (isset($_GET['ptId'])) {
-            // store session data
-            $_SESSION['patient'] = Patient::getInstance($_GET['ptId']);
-            if ($_SESSION['patient']->isInPatient())
-                $_SESSION['in_patient'] = new InPatient($_SESSION['patient']);
-            else
-                $_SESSION['out_patient'] = new OutPatient($_SESSION['patient']);
-        }
-        else die("Patient ID is not here. There is nothing to show you!");
+    // Check whether patient id is in the address
+    if (isset($_GET['ptId'])) {
+        // store session data
+        $_SESSION['patient'] = Patient::getInstance(false, $_GET['ptId']);
+        if ($_SESSION['patient']->isInPatient())
+            $_SESSION['in_patient'] = new InPatient($_SESSION['patient']);
+        else
+            $_SESSION['out_patient'] = new OutPatient($_SESSION['patient']);
     }
+    elseif (isset($_GET['close'])) {
+        header("Location: ../index.php");
+    }
+    else die("Patient ID is not here. There is nothing to show you!");
     ?>
 
     <title>View Patient Details</title>
@@ -61,8 +62,7 @@ session_start();
                 <a class="nav-link id=" id="pt-tab-2" data-bs-toggle="tab" href="#pt-tab-panel-2" role="tab"
                    aria-controls="pt-tab-panel-2" aria-selected="false">In-patient status</a>
             </li>
-        <?php } ?>
-        <?php if (!$_SESSION['patient']->isInPatient()) { ?>
+        <?php } else { ?>
             <li class="nav-item" role="presentation" id="nav-itm-3">
                 <a class="nav-link id=" id="pt-tab-3" data-bs-toggle="tab" href="#pt-tab-panel-3" role="tab"
                    aria-controls="pt-tab-panel-3" aria-selected="false">Out-patient status</a>
@@ -96,7 +96,7 @@ session_start();
                 </table>
             </div>
             <div class="mb-3">
-                <button type="submit" class="btn btn-danger btn-block login-btn" name="btnClose">Close</button>
+                <a class="btn btn-danger btn-block" href="view.php?close">Close</a>
             </div>
         </div>
         <!-- 1st content -->

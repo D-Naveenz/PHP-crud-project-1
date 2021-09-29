@@ -6,13 +6,21 @@ require_once "../core/OutPatient.php";
 // start the session
 session_start();
 
-// store session data
-$_SESSION['patient'] = Patient::getInstance();
+// store session data with checking get requests
+$_SESSION['patient'] = Patient::getInstance(!isset($_GET['Add']));
 $_SESSION['available_beds'] = InPatient::getFreeBeds();
-if ($_SESSION['patient']->isInPatient())
-    $_SESSION['verified_patient'] = new InPatient($_SESSION['patient']);
-else
-    $_SESSION['verified_patient'] = new OutPatient($_SESSION['patient']);
+//Checking whether the patient's status (in / out) has already been declared
+if ($_SESSION['patient']->isExistsInDb()) {
+    if ($_SESSION['patient']->isInPatient()) {
+        $_SESSION['in_patient'] = new InPatient($_SESSION['patient']);
+    } else {
+        $_SESSION['out_patient'] = new OutPatient($_SESSION['patient']);
+    }
+}
+
+$is_patient_exists = $_SESSION['patient']->isExistsInDb();
+$p_has_instance = $_SESSION['patient']->has_instance;
+$is_in_patient = $_SESSION['patient']->isInPatient();
 ?>
 
 <!doctype html>
@@ -44,38 +52,31 @@ else
             $_SESSION['patient']->setType($_POST['pType']);
 
             $result = $_SESSION['patient']->insertToDb();
-        }
 
-        //Checking whether the patient's status (in / out) has already been declared
-        if ($_SESSION['patient']->isExistsInDb()) {
-            if ($_SESSION['patient']->isInPatient()) {
-                $_SESSION['in_patient'] = new InPatient($_SESSION['patient']);
-            }
-            else {
-                $_SESSION['out_patient'] = new OutPatient($_SESSION['patient']);
-            }
+            // reload the page
+            header("Location: ".$_SERVER['PHP_SELF']);
         }
 
         // Submitting the in-patient's information
         if (isset($_POST['btnSubIn'])) {
-            $_SESSION['verified_patient']->dob = $_POST['pDOB'];
-            $_SESSION['verified_patient']->setAddDate($_POST['pAddDate']);
-            $_SESSION['verified_patient']->setAddTime($_POST['pAddTime']);
-            $_SESSION['verified_patient']->setDisDate($_POST['pDisDate']);
-            $_SESSION['verified_patient']->setDisTime($_POST['pDisTime']);
-            $_SESSION['verified_patient']->pc_doc = $_POST['pPcDoc'];
-            $_SESSION['verified_patient']->bed_id = $_POST['pBed'];
+            $_SESSION['in_patient']->dob = $_POST['pDOB'];
+            $_SESSION['in_patient']->setAddDate($_POST['pAddDate']);
+            $_SESSION['in_patient']->setAddTime($_POST['pAddTime']);
+            $_SESSION['in_patient']->setDisDate($_POST['pDisDate']);
+            $_SESSION['in_patient']->setDisTime($_POST['pDisTime']);
+            $_SESSION['in_patient']->pc_doc = $_POST['pPcDoc'];
+            $_SESSION['in_patient']->bed_id = $_POST['pBed'];
 
-            $result = $_SESSION['verified_patient']->insertToDb();
+            $result = $_SESSION['in_patient']->insertToDb();
             session_destroy();
         }
 
         // Submitting the out-patient's information
         if (isset($_POST['btnSubOut'])) {
-            $_SESSION['verified_patient']->setArrDate($_POST['pArrDate']);
-            $_SESSION['verified_patient']->setArrTime($_POST['pArrTime']);
+            $_SESSION['out_patient']->setArrDate($_POST['pArrDate']);
+            $_SESSION['out_patient']->setArrTime($_POST['pArrTime']);
 
-            $result = $_SESSION['verified_patient']->insertToDb();
+            $result = $_SESSION['out_patient']->insertToDb();
             session_destroy();
         }
 
@@ -89,67 +90,37 @@ else
     <script type="text/javascript">
         const prefix = "<?php echo $_SESSION['patient']::id_prefix; ?>";
         let pId = "<?php echo $_SESSION['patient']->getPatientId(); ?>";
-        let is_in_patient = <?php echo $_SESSION['patient']->isInPatient()? 'true':'false'; ?>;
-        let is_patient_exists = <?php echo  $_SESSION['patient']->isExistsInDb()? 'true':'false'; ?>;
-        let p_instance_exists = <?php echo  $_SESSION['patient']->has_instance? 'true':'false'; ?>;
-
-
-        function check_patient_type() {
-            if ($('#radPt1').is(':checked')) {
-                return 1;
-            }
-            else {
-                return 2;
-            }
-        }
 
         function in_out_pt_event() {
-            if (check_patient_type() === 1) {
-                $('#nav-itm-2').show();
-                $('#nav-itm-3').hide();
-            }
-            else {
+            if ($('#radPt1').is(':checked')) {
                 $('#nav-itm-2').hide();
                 $('#nav-itm-3').show();
+            } else {
+                $('#nav-itm-2').show();
+                $('#nav-itm-3').hide();
             }
         }
 
         function disable_form(form_id, selector) {
-            if (selector) {
-                $(form_id + ' :input').prop("disabled",true);
-            }
-            else {
-                $(form_id + ' :input').prop("disabled",false);
-            }
+            $(form_id + ' :input').prop("disabled", selector);
         }
 
         window.onload = () => {
-            // Initializing
+            // Initializing form elements
             in_out_pt_event();
-            disable_form('#pt-in', !is_in_patient);
-            disable_form('#pt-out', !is_in_patient);
+            $('<?php echo $is_in_patient ? '#radPt1' : '#radPt2'; ?>').prop('checked', true);
+            $('#txtPt2').val("<?php echo $_SESSION['patient']->name; ?>");
 
-            if (is_patient_exists || p_instance_exists) {
-                let patient_name = "<?php echo $_SESSION['patient']->name; ?>";
-                $('#txtPt2').val(patient_name);
+            // Dynamically disabling forms
+            <?php if ($is_patient_exists || $p_has_instance) { ?>
                 disable_form('#pt-basic', true);
-                if (check_patient_type() === 1) {
-                    $('#pt-tab-2').trigger('click');
-                    disable_form('#pt-in', false);
-                }
-                else {
-                    $('#pt-tab-3').trigger('click');
-                    disable_form('#pt-out', false);
-                }
-            }
+            <?php } else { ?>
+                disable_form('#pt-in', true);
+                disable_form('#pt-out', true);
+            <?php } ?>
         };
 
-        $(document).ready(function(){
-            if (is_in_patient) {
-                $('#radPt1').prop('checked', true);
-            }
-            else $('#radPt2').prop('checked', true);
-
+        $(document).ready(function () {
             // In / Out patient event handler
             $('input[name="pType"]').change(() => {
                 in_out_pt_event()
@@ -167,16 +138,16 @@ else
                     ":" + (currentDate.getSeconds()<10?'0':'') + currentDate.getSeconds();
                  */
                 let formatDate = currentDate.getFullYear() +
-                    "-" + (((currentDate.getMonth())+1)<10?'0':'') + ((currentDate.getMonth())+1) +
-                    "-" + (currentDate.getDate()<10?'0':'') + currentDate.getDate();
+                    "-" + (((currentDate.getMonth()) + 1) < 10 ? '0' : '') + ((currentDate.getMonth()) + 1) +
+                    "-" + (currentDate.getDate() < 10 ? '0' : '') + currentDate.getDate();
                 $('#txtIn2-date').val(formatDate);
             })
 
             // Get current time
             $('#pt-in-btn-time').click(() => {
                 let currentDate = new Date();
-                let formatTime = (currentDate.getHours()<10?'0':'') + currentDate.getHours() +
-                    ":" + (currentDate.getMinutes()<10?'0':'') + currentDate.getMinutes();
+                let formatTime = (currentDate.getHours() < 10 ? '0' : '') + currentDate.getHours() +
+                    ":" + (currentDate.getMinutes() < 10 ? '0' : '') + currentDate.getMinutes();
                 $('#txtIn2-time').val(formatTime);
             })
         });
@@ -235,7 +206,8 @@ else
                 <div class="btn-group mb-3">
                     <input class="btn-check" type="radio" name="pType" id="radPt1" value="Inpatient" autocomplete="off">
                     <label class="btn btn-secondary" for="radPt1">In-patient</label>
-                    <input class="btn-check" type="radio" name="pType" id="radPt2" value="Outpatient" autocomplete="off">
+                    <input class="btn-check" type="radio" name="pType" id="radPt2" value="Outpatient"
+                           autocomplete="off">
                     <label class="btn btn-secondary" for="radPt2">Out-patient</label>
                 </div>
                 <div class="mb-3">
@@ -285,9 +257,9 @@ else
                     <div class="input-group mb-3">
                         <label class="input-group-text" for="txtIn6">Available Beds</label>
                         <select class="form-select" name="pBed" id="txtIn6">
-                            <?php foreach($_SESSION['available_beds'] as $value) { ?>
+                            <?php foreach ($_SESSION['available_beds'] as $value) { ?>
                                 <option value="<?php echo $value ?>"><?php echo $value ?></option>
-                            <?php }?>
+                            <?php } ?>
                         </select>
                     </div>
                 </div>

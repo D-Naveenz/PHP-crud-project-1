@@ -82,7 +82,7 @@ class OutPatient extends Patient
         if ($result->num_rows == 1) {
             return $result->fetch_assoc();
         }
-        else if ($result->num_rows > 1) {
+        elseif ($result->num_rows > 1) {
             die("Out-Patient table has many results with the same id: $patient_id! | rows: $result->num_rows");
         }
         return null;

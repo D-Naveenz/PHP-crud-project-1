@@ -139,7 +139,7 @@ VALUES ('$this->patient_id', '$this->dob', '$this->add_date', '$this->add_time',
         if ($result->num_rows == 1) {
             return $result->fetch_assoc();
         }
-        else if ($result->num_rows > 1) {
+        elseif ($result->num_rows > 1) {
             die("In-Patient table has many results with the same id: $patient_id! | rows: $result->num_rows");
         }
         return null;
