@@ -4,12 +4,7 @@ include "core/config.php";
 // start the session
 session_start();
 // generate session variables to locate the current page
-/*$url = basename($_SERVER['PHP_SELF']);
-$query = $_SERVER['QUERY_STRING'];
-if($query){
-    $url .= "?".$query;
-}
-$_SESSION['current_page'] = $url;*/
+$_SESSION['previous_page'] = getAbsUrl();
 ?>
 <!doctype html>
 <html lang="en">
@@ -49,8 +44,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $userid = $_POST['userid'];
         $pass = $_POST['password'];
 
-        header("Location: ./patient/add.php?update=PT0006");
-        //header("Location: ./patient/add.php?create");
+        header("Location: ./patient/delete.php?id=PT0005");
+        //header("Location: ./patient/edit.php?create");
     }
 }
 ?>

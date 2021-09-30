@@ -113,7 +113,7 @@ class Patient
         return false;
     }
 
-    public function updateDb(): bool
+    public function updateRow(): bool
     {
         $database = createMySQLConn();
         if ($this->name != "" && $this->type != "") {
@@ -127,6 +127,19 @@ class Patient
 
             return true;
         }
+        return false;
+    }
+
+    public function deleteRow(): bool
+    {
+        $database = createMySQLConn();
+        $sql = "DELETE FROM `patient` WHERE `patient`.`Patient_ID` = '$this->patient_id'";
+
+        if ($database->query($sql) === TRUE) {
+            echo "Record deleted successfully";
+            return true;
+        }
+        echo "Error deleting record: " . $database->error;
         return false;
     }
 }

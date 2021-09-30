@@ -106,6 +106,19 @@ class InPatient extends Patient
         $this->dis_time = isDateTimeStrNull($dis_time);
     }
 
+    private function getInPatientData($patient_id): array|null
+    {
+        $database = createMySQLConn();
+        $result = $database->query("SELECT * FROM `in_patient` WHERE `Patient_ID` = '$patient_id'");
+        if ($result->num_rows == 1) {
+            return $result->fetch_assoc();
+        }
+        elseif ($result->num_rows > 1) {
+            die("In-Patient table has many results with the same id: $patient_id! | rows: $result->num_rows");
+        }
+        return null;
+    }
+
     public function insertToDb(): bool
     {
         $database = createMySQLConn();
@@ -123,10 +136,10 @@ class InPatient extends Patient
         return false;
     }
 
-    public function updateDb(): bool
+    public function updateRow(): bool
     {
         $database = createMySQLConn();
-        if (parent::updateDb()) {
+        if (parent::updateRow()) {
             $sql = "UPDATE `in_patient` SET `DOB` = ?, `Admitted_Date` = ?, `Admitted_Time` = ?, `Discharge_Date` = ?, `Discharge_Time` = ?, `PC_Doctor` = ?, `Bed_ID` = ? WHERE `in_patient`.`Patient_ID` = ? AND `in_patient`.`Admitted_Date` = ? AND `in_patient`.`Admitted_Time` = ?;";
             $sql_statement = $database->prepare($sql);
             // bind param with references : https://www.php.net/manual/en/language.references.whatare.php
@@ -143,21 +156,25 @@ class InPatient extends Patient
         return false;
     }
 
+    public function deleteRow(): bool
+    {
+        $database = createMySQLConn();
+        $sql = "DELETE FROM `in_patient` WHERE `in_patient`.`Patient_ID` = ? AND `in_patient`.`Admitted_Date` = ? AND `in_patient`.`Admitted_Time` = ?";
+        $sql_statement = $database->prepare($sql);
+        // bind param with references : https://www.php.net/manual/en/language.references.whatare.php
+        $sql_statement->bind_param("sss", $this->patient_id, $this->add_date, $this->add_time);
+        // Execution
+        if ($sql_statement->execute()) {
+            parent::deleteRow();
+            $sql_statement->close();
+            return true;
+        }
+        $sql_statement->close();
+        return false;
+    }
+
     public static function getFreeBeds(): array
     {
         return AvailableBeds();
-    }
-
-    private function getInPatientData($patient_id): array|null
-    {
-        $database = createMySQLConn();
-        $result = $database->query("SELECT * FROM `in_patient` WHERE `Patient_ID` = '$patient_id'");
-        if ($result->num_rows == 1) {
-            return $result->fetch_assoc();
-        }
-        elseif ($result->num_rows > 1) {
-            die("In-Patient table has many results with the same id: $patient_id! | rows: $result->num_rows");
-        }
-        return null;
     }
 }

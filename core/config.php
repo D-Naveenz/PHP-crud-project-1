@@ -68,3 +68,14 @@ function isDateTimeStrNull(string $date_time_str): ?string
     if ($date_time_str == "0000-00-00" || $date_time_str == "00-00") return null;
     else return $date_time_str;
 }
+
+function getAbsUrl(): string
+{
+    $url = "http".(!empty($_SERVER['HTTPS'])?"s":"").
+        "://".$_SERVER['SERVER_NAME'].$_SERVER['SCRIPT_NAME'];
+    $query = $_SERVER['QUERY_STRING'];
+    if($query){
+        $url .= "?".$query;
+    }
+    return $url;
+}

@@ -7,6 +7,7 @@ require_once "../core/OutPatient.php";
 session_start();
 
 // store session data with checking get requests
+$_SESSION['available_beds'] = InPatient::getFreeBeds();
 if (isset($_GET['create'])) {
     // form is preparing to create the patient record
     $_SESSION['patient'] = new Patient();
@@ -22,8 +23,6 @@ if (isset($_GET['create'])) {
         $_SESSION['patient'] = new OutPatient($_SESSION['patient']->getPatientId());
     }
 }
-
-$_SESSION['available_beds'] = InPatient::getFreeBeds();
 
 // Post requests
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -54,10 +53,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_POST['btnCreate'])) {
         // Submitting the 'create' form inputs
         $result = $temp_p->insertToDb();
+        if ($result) $_SESSION['patient'] = $temp_p;
     } elseif (isset($_POST['btnUpdate'])) {
         // Submitting the 'update' form inputs
-        $result = $temp_p->updateDb();
+        $result = $temp_p->updateRow();
+        if ($result) $_SESSION['patient'] = $temp_p;
     }
+
+    // redirect to previous page
+    header("Location: ".$_SESSION['previous_page']);
 }
 ?>
 
@@ -83,7 +87,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     <!-- Custom Javascript -->
     <script type="text/javascript">
-        function in_out_tabs_visible() {
+        function in_n_out_event() {
             if ($('#radPt1').is(':checked')) {
                 $('#nav-itm-2').show();
                 $('#nav-itm-3').hide();
@@ -97,7 +101,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // Initializing form elements
             $('<?php echo $_SESSION['patient']->isInPatient() ? '#radPt1' : '#radPt2'; ?>').prop('checked', true);
             // disable the relevant from according to radio buttons' changes
-            in_out_tabs_visible();
+            in_n_out_event();
 
             <?php if (isset($_GET['update']) && !empty($_GET['update'])) { ?>
             // Initializing form elements according to the update request
@@ -129,7 +133,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $(document).ready(function () {
             // In / Out patient event handler
             $('input[name="pType"]').change(() => {
-                in_out_tabs_visible()
+                in_n_out_event()
             });
 
             // Get today's date
@@ -165,7 +169,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <body>
 <!-- Body Header -->
 <div class="container-fluid p-5 bg-primary text-white text-center">
-    <h1>Add New Patient</h1>
+    <?php if (isset($_GET['update']) && !empty($_GET['update'])) { ?>
+        <h1>Update <?php echo $_SESSION['patient']->name ?></h1>
+    <?php } else { ?>
+        <h1>Add New Patient</h1>
+    <?php } ?>
     <p>Suwa Sahana Hospital</p>
 </div>
 
@@ -194,7 +202,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <div class="container tab-pane active" id="pt-tab-panel-1" role="tabpanel" aria-labelledby="pt-tab-panel-1">
                 <div class="mb-3">
                     <h2>Patient basic information</h2>
-                    <input type="hidden" name="pId" value="<?php echo $_SESSION['patient']->getPatientId(); ?>"/>
+                    <input type="hidden" name="pId" value="<?php echo $_SESSION['patient']->getPatientId(); ?>" required/>
                 </div>
                 <div class="mb-3">
                     <label class="form-label" for="ptID">Patient ID</label>
@@ -232,10 +240,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <label class="form-label" for="txtIn2-date">Admitted on</label>
                     <div class="input-group">
                         <span class="input-group-text">Date: </span>
-                        <input type="date" class="form-control" name="pAddDate" id="txtIn2-date" placeholder="Date">
+                        <input type="date" class="form-control primary-key" name="pAddDate" id="txtIn2-date" placeholder="Date">
                         <button class="btn btn-outline-secondary" type="button" id="pt-in-btn-date">Today</button>
                         <span class="input-group-text">Time: </span>
-                        <input type="time" class="form-control" name="pAddTime" id="txtIn2-time" placeholder="Time">
+                        <input type="time" class="form-control primary-key" name="pAddTime" id="txtIn2-time" placeholder="Time">
                         <button class="btn btn-outline-secondary" type="button" id="pt-in-btn-time">Now</button>
                     </div>
                 </div>
@@ -275,9 +283,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <label class="form-label" for="txtOut1-date">Arrived at</label>
                     <div class="input-group">
                         <span class="input-group-text">Date: </span>
-                        <input type="date" class="form-control" name="pArrDate" id="txtOut1-date" placeholder="Date">
+                        <input type="date" class="form-control primary-key" name="pArrDate" id="txtOut1-date" placeholder="Date">
                         <span class="input-group-text">Time: </span>
-                        <input type="time" class="form-control" name="pArrTime" id="txtOut1-time" placeholder="Time">
+                        <input type="time" class="form-control primary-key" name="pArrTime" id="txtOut1-time" placeholder="Time">
                     </div>
                 </div>
             </div>

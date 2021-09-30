@@ -58,6 +58,19 @@ class OutPatient extends Patient
         $this->arr_time = isDateTimeStrNull($arr_time);
     }
 
+    private function getOutPatientData($patient_id): array|null
+    {
+        $database = createMySQLConn();
+        $result = $database->query("SELECT * FROM `out_patient` WHERE `Patient_ID` = '$patient_id'");
+        if ($result->num_rows == 1) {
+            return $result->fetch_assoc();
+        }
+        elseif ($result->num_rows > 1) {
+            die("Out-Patient table has many results with the same id: $patient_id! | rows: $result->num_rows");
+        }
+        return null;
+    }
+
     public function insertToDb(): bool
     {
         $database = createMySQLConn();
@@ -75,10 +88,10 @@ class OutPatient extends Patient
         return false;
     }
 
-    public function updateDb(): bool
+    public function updateRow(): bool
     {
         $database = createMySQLConn();
-        if (parent::updateDb()) {
+        if (parent::updateRow()) {
             $sql = "UPDATE `out_patient` SET `Arrived_Date` = ?, `Arrived_Time` = ? WHERE `out_patient`.`Patient_ID` = ? AND `out_patient`.`Arrived_Date` = ? AND `out_patient`.`Arrived_Time` = ?;";
             $sql_statement = $database->prepare($sql);
             // bind param with references : https://www.php.net/manual/en/language.references.whatare.php
@@ -94,16 +107,20 @@ class OutPatient extends Patient
         return false;
     }
 
-    private function getOutPatientData($patient_id): array|null
+    public function deleteRow(): bool
     {
         $database = createMySQLConn();
-        $result = $database->query("SELECT * FROM `out_patient` WHERE `Patient_ID` = '$patient_id'");
-        if ($result->num_rows == 1) {
-            return $result->fetch_assoc();
+        $sql = "DELETE FROM `out_patient` WHERE `out_patient`.`Patient_ID` = ? AND `out_patient`.`Arrived_Date` = ? AND `out_patient`.`Arrived_Time` = ?";
+        $sql_statement = $database->prepare($sql);
+        // bind param with references : https://www.php.net/manual/en/language.references.whatare.php
+        $sql_statement->bind_param("sss", $this->patient_id, $this->arr_date, $this->arr_time);
+        // Execution
+        if ($sql_statement->execute()) {
+            parent::deleteRow();
+            $sql_statement->close();
+            return true;
         }
-        elseif ($result->num_rows > 1) {
-            die("Out-Patient table has many results with the same id: $patient_id! | rows: $result->num_rows");
-        }
-        return null;
+        $sql_statement->close();
+        return false;
     }
 }
