@@ -7,20 +7,27 @@ require_once "../core/OutPatient.php";
 session_start();
 
 // store session data with checking get requests
-$_SESSION['patient'] = Patient::getInstance(!isset($_GET['Add']));
-$_SESSION['available_beds'] = InPatient::getFreeBeds();
-//Checking whether the patient's status (in / out) has already been declared
-if ($_SESSION['patient']->isExistsInDb()) {
-    if ($_SESSION['patient']->isInPatient()) {
-        $_SESSION['in_patient'] = new InPatient($_SESSION['patient']);
-    } else {
-        $_SESSION['out_patient'] = new OutPatient($_SESSION['patient']);
-    }
+if (isset($_GET['create'])) {
+    // form is preparing to create the patient record
+    $_SESSION['patient'] = new Patient();
+} elseif (isset($_GET['update']) && !empty($_GET['update'])) {
+    // form is preparing to update the patient record
+    if (!isset($_SESSION['patient']))
+        $_SESSION['patient'] = new Patient($_GET['update']);
+} elseif (isset($_SESSION['patient']) && !$_SESSION['patient']->isExistsInDb()) {
+    unset($_SESSION['patient']);
+    header("Location: ./add.php?create");
 }
 
-$is_patient_exists = $_SESSION['patient']->isExistsInDb();
-$p_has_instance = $_SESSION['patient']->has_instance;
-$is_in_patient = $_SESSION['patient']->isInPatient();
+if ($_SESSION['patient']->isInPatient()) {
+    // create new in-patient object from the parent object
+    $_SESSION['patient'] = new InPatient($_SESSION['patient']->getPatientId());
+} else {
+    // create new out-patient object with the same name
+    $_SESSION['patient'] = new OutPatient($_SESSION['patient']->getPatientId());
+}
+
+$_SESSION['available_beds'] = InPatient::getFreeBeds();
 ?>
 
 <!doctype html>
@@ -48,36 +55,41 @@ $is_in_patient = $_SESSION['patient']->isInPatient();
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // Submitting the patient's basic information
         if (isset($_POST['btnSubPt'])) {
-            $_SESSION['patient']->name = $_POST['pName'];
-            $_SESSION['patient']->setType($_POST['pType']);
+            $tmp_pt = new Patient($_POST['pId']);
+            var_dump($_POST['pId']);
+            $tmp_pt->name = $_POST['pName'];
+            $tmp_pt->setType($_POST['pType']);
 
-            $result = $_SESSION['patient']->insertToDb();
+            $result = $tmp_pt->insertToDb();
+            if ($result) {
+                $_SESSION['patient'] = $tmp_pt;
+            }
 
             // reload the page
-            header("Location: ".$_SERVER['PHP_SELF']);
+            //header("Location: ".$_SERVER['PHP_SELF']);
         }
 
         // Submitting the in-patient's information
         if (isset($_POST['btnSubIn'])) {
-            $_SESSION['in_patient']->dob = $_POST['pDOB'];
-            $_SESSION['in_patient']->setAddDate($_POST['pAddDate']);
-            $_SESSION['in_patient']->setAddTime($_POST['pAddTime']);
-            $_SESSION['in_patient']->setDisDate($_POST['pDisDate']);
-            $_SESSION['in_patient']->setDisTime($_POST['pDisTime']);
-            $_SESSION['in_patient']->pc_doc = $_POST['pPcDoc'];
-            $_SESSION['in_patient']->bed_id = $_POST['pBed'];
+            $tmp_pin = new InPatient($_POST['pId']);
+            $tmp_pin->dob = $_POST['pDOB'];
+            $tmp_pin->setAddDate($_POST['pAddDate']);
+            $tmp_pin->setAddTime($_POST['pAddTime']);
+            $tmp_pin->setDisDate($_POST['pDisDate']);
+            $tmp_pin->setDisTime($_POST['pDisTime']);
+            $tmp_pin->pc_doc = $_POST['pPcDoc'];
+            $tmp_pin->bed_id = $_POST['pBed'];
 
-            $result = $_SESSION['in_patient']->insertToDb();
-            session_destroy();
+            $result = $tmp_pin->insertToDb();
         }
 
         // Submitting the out-patient's information
         if (isset($_POST['btnSubOut'])) {
-            $_SESSION['out_patient']->setArrDate($_POST['pArrDate']);
-            $_SESSION['out_patient']->setArrTime($_POST['pArrTime']);
+            $tmp_pout = new OutPatient($_POST['pId']);
+            $tmp_pout->setArrDate($_POST['pArrDate']);
+            $tmp_pout->setArrTime($_POST['pArrTime']);
 
-            $result = $_SESSION['out_patient']->insertToDb();
-            session_destroy();
+            $result = $tmp_pout->insertToDb();
         }
 
         if (isset($_POST['btnClose'])) {
@@ -88,16 +100,13 @@ $is_in_patient = $_SESSION['patient']->isInPatient();
 
     <!-- Javascript -->
     <script type="text/javascript">
-        const prefix = "<?php echo $_SESSION['patient']::id_prefix; ?>";
-        let pId = "<?php echo $_SESSION['patient']->getPatientId(); ?>";
-
-        function in_out_pt_event() {
+        function in_out_tabs_visible() {
             if ($('#radPt1').is(':checked')) {
-                $('#nav-itm-2').hide();
-                $('#nav-itm-3').show();
-            } else {
                 $('#nav-itm-2').show();
                 $('#nav-itm-3').hide();
+            } else {
+                $('#nav-itm-2').hide();
+                $('#nav-itm-3').show();
             }
         }
 
@@ -107,23 +116,50 @@ $is_in_patient = $_SESSION['patient']->isInPatient();
 
         window.onload = () => {
             // Initializing form elements
-            in_out_pt_event();
-            $('<?php echo $is_in_patient ? '#radPt1' : '#radPt2'; ?>').prop('checked', true);
-            $('#txtPt2').val("<?php echo $_SESSION['patient']->name; ?>");
+            $('<?php echo $_SESSION['patient']->isInPatient() ? '#radPt1' : '#radPt2'; ?>').prop('checked', true);
+            // disable the relevant from according to radio buttons' changes
+            in_out_tabs_visible();
 
-            // Dynamically disabling forms
-            <?php if ($is_patient_exists || $p_has_instance) { ?>
-                disable_form('#pt-basic', true);
+            <?php if (isset($_GET['update']) && !empty($_GET['update'])) { ?>
+            // Initializing form elements according to the update request
+            // hide all save buttons
+            $('.req-create').hide();
+            <?php
+                if ($_SESSION['patient']->isInPatient()) {
+            ?>
+            $('#txtIn1').val("<?php echo $_SESSION['patient']->dob ?>");
+            $('#txtIn2-date').val("<?php echo $_SESSION['patient']->getAddDate() ?>");
+            $('#txtIn2-time').val("<?php echo $_SESSION['patient']->getAddTime() ?>");
+            $('#txtIn3-date').val("<?php echo $_SESSION['patient']->getDisDate() ?>");
+            $('#txtIn3-time').val("<?php echo $_SESSION['patient']->getDisTime() ?>");
+            $('#txtIn4').val("<?php echo $_SESSION['patient']->pc_doc ?>");
+            let option_text = "<?php echo $_SESSION['patient']->bed_id ?>";
+            $('#txtIn5').append(new Option(option_text, option_text, true, true));
             <?php } else { ?>
-                disable_form('#pt-in', true);
-                disable_form('#pt-out', true);
-            <?php } ?>
+            $('#txtOut1-date').val("<?php echo $_SESSION['patient']->getArrDate() ?>");
+            $('#txtOut1-time').val("<?php echo $_SESSION['patient']->getArrTime() ?>");
+            <?php
+                }
+            } else {
+            ?>
+            // hide all update buttons
+            $('.req-update').hide();
+             // Dynamically disabling forms
+            <?php if ($_SESSION['patient']->isExistsInDb()) { ?>
+            disable_form('#pt-basic', true);
+            <?php } else { ?>
+            disable_form('#pt-in', true);
+            disable_form('#pt-out', true);
+            <?php
+                }
+            }
+            ?>
         };
 
         $(document).ready(function () {
             // In / Out patient event handler
             $('input[name="pType"]').change(() => {
-                in_out_pt_event()
+                in_out_tabs_visible()
             });
 
             // Get today's date
@@ -189,6 +225,7 @@ $is_in_patient = $_SESSION['patient']->isInPatient();
             <form id="pt-basic" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
                 <div class="mb-3">
                     <h2>Patient basic information</h2>
+                    <input type="hidden" name="pId" value="<?php echo $_SESSION['patient']->getPatientId(); ?>"/>
                 </div>
                 <div class="mb-3">
                     <label class="form-label" for="ptID">Patient ID</label>
@@ -201,7 +238,7 @@ $is_in_patient = $_SESSION['patient']->isInPatient();
                 </div>
                 <div class="mb-3">
                     <label class="form-label" for="txtPt2">Name</label>
-                    <input type="text" class="form-control" name="pName" id="txtPt2" required>
+                    <input type="text" class="form-control" name="pName" id="txtPt2" value="<?php echo $_SESSION['patient']->name; ?>" required>
                 </div>
                 <div class="btn-group mb-3">
                     <input class="btn-check" type="radio" name="pType" id="radPt1" value="Inpatient" autocomplete="off">
@@ -210,9 +247,10 @@ $is_in_patient = $_SESSION['patient']->isInPatient();
                            autocomplete="off">
                     <label class="btn btn-secondary" for="radPt2">Out-patient</label>
                 </div>
-                <div class="mb-3">
-                    <button type="submit" class="btn btn-danger btn-block login-btn" name="btnClose">Close</button>
-                    <button type="submit" class="btn btn-primary btn-block login-btn" name="btnSubPt">Save</button>
+                <div class="mb-3 form-add-buttonbar">
+                    <button type="submit" class="btn btn-danger btn-block" name="btnClose">Close</button>
+                    <button type="submit" class="btn btn-primary btn-block req-create" name="btnSubPt">Save</button>
+                    <button type="submit" class="btn btn-primary btn-block req-update" name="btnUpdateSub">Update</button>
                 </div>
             </form>
         </div>
@@ -223,6 +261,7 @@ $is_in_patient = $_SESSION['patient']->isInPatient();
             <form id="pt-in" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
                 <div class="mb-3">
                     <h2>In-patient information</h2>
+                    <input type="hidden" name="pId" value="<?php echo $_SESSION['patient']->getPatientId(); ?>"/>
                 </div>
                 <div class="mb-3">
                     <label class="form-label" for="txtIn1">Date of Birth</label>
@@ -249,23 +288,24 @@ $is_in_patient = $_SESSION['patient']->isInPatient();
                     </div>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label" for="txtIn5">Primary Care Doctor</label>
-                    <input type="text" class="form-control" name="pPcDoc" id="txtIn5">
+                    <label class="form-label" for="txtIn4">Primary Care Doctor</label>
+                    <input type="text" class="form-control" name="pPcDoc" id="txtIn4">
                 </div>
                 <div class="mb-3">
-                    <label class="form-label" for="txtIn6">Bed ID</label>
+                    <label class="form-label" for="txtIn5">Bed ID</label>
                     <div class="input-group mb-3">
                         <label class="input-group-text" for="txtIn6">Available Beds</label>
-                        <select class="form-select" name="pBed" id="txtIn6">
+                        <select class="form-select" name="pBed" id="txtIn5">
                             <?php foreach ($_SESSION['available_beds'] as $value) { ?>
                                 <option value="<?php echo $value ?>"><?php echo $value ?></option>
                             <?php } ?>
                         </select>
                     </div>
                 </div>
-                <div class="mb-3">
-                    <button type="submit" class="btn btn-danger btn-block login-btn" name="btnClose">Close</button>
-                    <button type="submit" class="btn btn-primary btn-block login-btn" name="btnSubIn">Save</button>
+                <div class="mb-3 form-add-buttonbar">
+                    <button type="submit" class="btn btn-danger btn-block" name="btnClose">Close</button>
+                    <button type="submit" class="btn btn-primary btn-block req-create" name="btnSubIn">Save</button>
+                    <button type="submit" class="btn btn-primary btn-block req-update" name="btnUpdateIn">Update</button>
                 </div>
             </form>
         </div>
@@ -275,7 +315,8 @@ $is_in_patient = $_SESSION['patient']->isInPatient();
         <div class="container tab-pane fade" id="pt-tab-panel-3" role="tabpanel" aria-labelledby="pt-tab-panel-3">
             <form id="pt-out" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
                 <div class="mb-3">
-                    <h2>In-patient information</h2>
+                    <h2>Out-patient information</h2>
+                    <input type="hidden" name="pId" value="<?php echo $_SESSION['patient']->getPatientId(); ?>"/>
                 </div>
                 <div class="mb-3">
                     <label class="form-label" for="txtOut1-date">Arrived at</label>
@@ -286,9 +327,10 @@ $is_in_patient = $_SESSION['patient']->isInPatient();
                         <input type="time" class="form-control" name="pArrTime" id="txtOut1-time" placeholder="Time">
                     </div>
                 </div>
-                <div class="mb-3">
-                    <button type="submit" class="btn btn-danger btn-block login-btn" name="btnClose">Close</button>
-                    <button type="submit" class="btn btn-primary btn-block login-btn" name="btnSubOut">Save</button>
+                <div class="mb-3 form-add-buttonbar">
+                    <button type="submit" class="btn btn-danger btn-block" name="btnClose">Close</button>
+                    <button type="submit" class="btn btn-primary btn-block req-create" name="btnSubOut">Save</button>
+                    <button type="submit" class="btn btn-primary btn-block req-update" name="btnUpdateOut">Update</button>
                 </div>
             </form>
         </div>

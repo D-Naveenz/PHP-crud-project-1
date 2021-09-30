@@ -49,8 +49,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $userid = $_POST['userid'];
         $pass = $_POST['password'];
 
-        //header("Location: ./patient/view.php?ptId=$userid");
-        header("Location: ./patient/add.php");
+        // header("Location: ./patient/add.php?update=PT0002");
+        header("Location: ./patient/add.php?create");
     }
 }
 ?>

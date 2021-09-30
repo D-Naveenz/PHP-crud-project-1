@@ -16,10 +16,21 @@ class InPatient extends Patient
     private ?string $dis_date;
     private ?string $dis_time;
 
-    function __construct(Patient $patient)
+    function __construct(string $pid)
     {
-        parent::__construct(false, $patient->patient_id);
-        if (!$this->exists_in_db) {
+        parent::__construct(false, $pid);
+        //Checking if the patient is in the database
+        $result = $this->getInPatientData($pid);
+        if ($result) {
+            $this->dob = $result['DOB'];
+            $this->add_date = $result['Admitted_Date'];
+            $this->add_time = $result['Admitted_Time'];
+            $this->dis_date = $result['Discharge_Date'];
+            $this->dis_time = $result['Discharge_Time'];
+            $this->pc_doc = $result['PC_Doctor'];
+            $this->bed_id = $result['Bed_ID'];
+        }
+        else {
             $this->dob = "";
             $this->add_date = null;
             $this->add_time = null;
@@ -27,19 +38,6 @@ class InPatient extends Patient
             $this->dis_time = null;
             $this->pc_doc = "";
             $this->bed_id = "";
-        }
-        else {
-            //Checking if the patient is in the database
-            $result = $this->inPatientExists($patient->patient_id);
-            if ($result) {
-                $this->dob = $result['DOB'];
-                $this->add_date = $result['Admitted_Date'];
-                $this->add_time = $result['Admitted_Time'];
-                $this->dis_date = $result['Discharge_Date'];
-                $this->dis_time = $result['Discharge_Time'];
-                $this->pc_doc = $result['PC_Doctor'];
-                $this->bed_id = $result['Bed_ID'];
-            }
         }
     }
 
@@ -112,16 +110,12 @@ class InPatient extends Patient
     {
         $database = createMySQLConn();
         if ($this->dob != "" && $this->pc_doc != "" && $this->bed_id != "") {
-            /*$sql = "INSERT INTO `in_patient` (`Patient_ID`, `DOB`, `Admitted_Date`, `Admitted_Time`, `Discharge_Date`, `Discharge_Time`, `PC_Doctor`, `Bed_ID`)
-VALUES ('$this->patient_id', '$this->dob', '$this->add_date', '$this->add_time', '$this->dis_date', '$this->dis_time', '$this->pc_doc', '$this->bed_id');";*/
             $sql = "INSERT INTO `in_patient` (`Patient_ID`, `DOB`, `Admitted_Date`, `Admitted_Time`, `Discharge_Date`, `Discharge_Time`, `PC_Doctor`, `Bed_ID`) VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
             $sql_statement = $database->prepare($sql);
             $sql_statement->bind_param("ssssssss", $this->patient_id, $this->dob, $this->add_date, $this->add_time, $this->dis_date, $this->dis_time, $this->pc_doc, $this->bed_id);
             $sql_statement->execute();
             $sql_statement->close();
 
-            // destroy the cookie if result is ok
-            Patient::destroyInstance();
             return true;
         }
         return false;
@@ -132,7 +126,7 @@ VALUES ('$this->patient_id', '$this->dob', '$this->add_date', '$this->add_time',
         return AvailableBeds();
     }
 
-    protected function inPatientExists($patient_id): array|null
+    private function getInPatientData($patient_id): array|null
     {
         $database = createMySQLConn();
         $result = $database->query("SELECT * FROM `in_patient` WHERE `Patient_ID` = '$patient_id'");
