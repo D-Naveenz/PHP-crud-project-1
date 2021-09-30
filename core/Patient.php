@@ -112,4 +112,21 @@ class Patient
         }
         return false;
     }
+
+    public function updateDb(): bool
+    {
+        $database = createMySQLConn();
+        if ($this->name != "" && $this->type != "") {
+            $sql = "UPDATE `patient` SET `Name` = ?, `Type` = ? WHERE `patient`.`Patient_ID` = ?;";
+            $sql_statement = $database->prepare($sql);
+            // bind param with references : https://www.php.net/manual/en/language.references.whatare.php
+            $sql_statement->bind_param("sss", $this->name, $this->type, $this->patient_id);
+            // Execution
+            $sql_statement->execute();
+            $sql_statement->close();
+
+            return true;
+        }
+        return false;
+    }
 }

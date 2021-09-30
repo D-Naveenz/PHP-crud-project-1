@@ -9,9 +9,9 @@ class OutPatient extends Patient
     private ?string $arr_date;
     private ?string $arr_time;
 
-    function __construct(string $pid)
+    function __construct(string $pid, private OutPatient|Patient|null $existing_in = null)
     {
-        parent::__construct(false, $pid);
+        parent::__construct($pid);
         //Checking if the patient is in the database
         $result = $this->getOutPatientData($pid);
         if ($result) {
@@ -61,13 +61,31 @@ class OutPatient extends Patient
     public function insertToDb(): bool
     {
         $database = createMySQLConn();
-        if ($this->arr_date != "" && $this->arr_time != "") {
+        if (parent::insertToDb()) {
             $sql = "INSERT INTO `out_patient` (`Patient_ID`, `Arrived_Date`, `Arrived_Time`) VALUES (?,?,?);";
             $sql_statement = $database->prepare($sql);
-            $sql_statement->bind_param("sss", $id, $arr_date, $arr_time);
-            $id = $this->patient_id;
-            $arr_date = $this->arr_date;
-            $arr_time = $this->arr_time;
+            // bind param with references : https://www.php.net/manual/en/language.references.whatare.php
+            $sql_statement->bind_param("sss", $this->patient_id, $this->arr_date, $this->arr_time);
+            // Execution
+            $sql_statement->execute();
+            $sql_statement->close();
+
+            return true;
+        }
+        return false;
+    }
+
+    public function updateDb(): bool
+    {
+        $database = createMySQLConn();
+        if (parent::updateDb()) {
+            $sql = "UPDATE `out_patient` SET `Arrived_Date` = ?, `Arrived_Time` = ? WHERE `out_patient`.`Patient_ID` = ? AND `out_patient`.`Arrived_Date` = ? AND `out_patient`.`Arrived_Time` = ?;";
+            $sql_statement = $database->prepare($sql);
+            // bind param with references : https://www.php.net/manual/en/language.references.whatare.php
+            $sql_statement->bind_param("sssss", $this->arr_date, $this->arr_time, $this->patient_id, $exist_date, $exist_time);
+            $exist_date = $this->existing_in->getArrDate();
+            $exist_time = $this->existing_in->getArrTime();
+            // Execution
             $sql_statement->execute();
             $sql_statement->close();
 

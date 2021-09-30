@@ -16,9 +16,9 @@ class InPatient extends Patient
     private ?string $dis_date;
     private ?string $dis_time;
 
-    function __construct(string $pid)
+    function __construct(string $pid, private InPatient|Patient|null $existing_in = null)
     {
-        parent::__construct(false, $pid);
+        parent::__construct($pid);
         //Checking if the patient is in the database
         $result = $this->getInPatientData($pid);
         if ($result) {
@@ -109,10 +109,32 @@ class InPatient extends Patient
     public function insertToDb(): bool
     {
         $database = createMySQLConn();
-        if ($this->dob != "" && $this->pc_doc != "" && $this->bed_id != "") {
+        if (parent::insertToDb()) {
             $sql = "INSERT INTO `in_patient` (`Patient_ID`, `DOB`, `Admitted_Date`, `Admitted_Time`, `Discharge_Date`, `Discharge_Time`, `PC_Doctor`, `Bed_ID`) VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
             $sql_statement = $database->prepare($sql);
+            // bind param with references : https://www.php.net/manual/en/language.references.whatare.php
             $sql_statement->bind_param("ssssssss", $this->patient_id, $this->dob, $this->add_date, $this->add_time, $this->dis_date, $this->dis_time, $this->pc_doc, $this->bed_id);
+            // Execution
+            $sql_statement->execute();
+            $sql_statement->close();
+
+            return true;
+        }
+        return false;
+    }
+
+    public function updateDb(): bool
+    {
+        $database = createMySQLConn();
+        if (parent::updateDb()) {
+            $sql = "UPDATE `in_patient` SET `DOB` = ?, `Admitted_Date` = ?, `Admitted_Time` = ?, `Discharge_Date` = ?, `Discharge_Time` = ?, `PC_Doctor` = ?, `Bed_ID` = ? WHERE `in_patient`.`Patient_ID` = ? AND `in_patient`.`Admitted_Date` = ? AND `in_patient`.`Admitted_Time` = ?;";
+            $sql_statement = $database->prepare($sql);
+            // bind param with references : https://www.php.net/manual/en/language.references.whatare.php
+            $sql_statement->bind_param("ssssssssss", $this->dob, $this->add_date, $this->add_time, $this->dis_date, $this->dis_time, $this->pc_doc, $this->bed_id, $this->patient_id,
+                $exist_date, $exist_time);
+            $exist_date = $this->existing_in->getAddDate();
+            $exist_time = $this->existing_in->getAddTime();
+            // Execution
             $sql_statement->execute();
             $sql_statement->close();
 
