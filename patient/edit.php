@@ -71,7 +71,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta charset="UTF-8">
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet"
@@ -99,7 +98,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         window.onload = () => {
             // Initializing form elements
-            $('<?php echo $_SESSION['patient']->isInPatient() ? '#radPt1' : '#radPt2'; ?>').prop('checked', true);
+            $('<?php echo ($_SESSION['patient'] instanceof InPatient) ? '#radPt1' : '#radPt2'; ?>').prop('checked', true);
             // disable the relevant from according to radio buttons' changes
             in_n_out_event();
 
@@ -108,7 +107,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // hide save button
             $('#btn-req-create').hide();
             <?php
-                if ($_SESSION['patient']->isInPatient()) {
+                if ($_SESSION['patient'] instanceof InPatient) {
             ?>
             $('#txtIn1').val("<?php echo $_SESSION['patient']->dob ?>");
             $('#txtIn2-date').val("<?php echo $_SESSION['patient']->getAddDate() ?>");
@@ -164,7 +163,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </script>
     <!-- Custom Javascript -->
 
-    <title>Add Patient Details</title>
+    <title>Add / Edit Patient Details</title>
 </head>
 <body>
 <!-- Body Header -->
@@ -177,7 +176,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <p>Suwa Sahana Hospital</p>
 </div>
 
-<div class="container" style="margin-top: 20px;" id="nav-patient">
+<div class="container-fluid" style="margin-top: 20px;" id="nav-patient">
     <!-- Tabs navs -->
     <ul class="nav nav-tabs nav-justified mb-3" id="pt-navbar" role="tablist">
         <li class="nav-item" role="presentation" id="nav-itm-1">
@@ -197,7 +196,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
         <!-- Tabs content -->
-        <div class="tab-content" id="nav-patient-content">
+        <div class="tab-content container" id="nav-patient-content">
             <!-- 1st content: Patient relation -->
             <div class="container tab-pane active" id="pt-tab-panel-1" role="tabpanel" aria-labelledby="pt-tab-panel-1">
                 <div class="mb-3">
@@ -243,7 +242,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         <input type="date" class="form-control primary-key" name="pAddDate" id="txtIn2-date" placeholder="Date">
                         <button class="btn btn-outline-secondary" type="button" id="pt-in-btn-date">Today</button>
                         <span class="input-group-text">Time: </span>
-                        <input type="time" class="form-control primary-key" name="pAddTime" id="txtIn2-time" placeholder="Time">
+                        <label for="txtIn2-time"></label><input type="time" class="form-control primary-key" name="pAddTime" id="txtIn2-time" placeholder="Time">
                         <button class="btn btn-outline-secondary" type="button" id="pt-in-btn-time">Now</button>
                     </div>
                 </div>
@@ -253,7 +252,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         <span class="input-group-text">Date: </span>
                         <input type="date" class="form-control" name="pDisDate" id="txtIn3-date" placeholder="Date">
                         <span class="input-group-text">Time: </span>
-                        <input type="time" class="form-control" name="pDisTime" id="txtIn3-time" placeholder="Time">
+                        <label for="txtIn3-time"></label><input type="time" class="form-control" name="pDisTime" id="txtIn3-time" placeholder="Time">
                     </div>
                 </div>
                 <div class="mb-3">
@@ -285,7 +284,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         <span class="input-group-text">Date: </span>
                         <input type="date" class="form-control primary-key" name="pArrDate" id="txtOut1-date" placeholder="Date">
                         <span class="input-group-text">Time: </span>
-                        <input type="time" class="form-control primary-key" name="pArrTime" id="txtOut1-time" placeholder="Time">
+                        <label for="txtOut1-time"></label><input type="time" class="form-control primary-key" name="pArrTime" id="txtOut1-time" placeholder="Time">
                     </div>
                 </div>
             </div>

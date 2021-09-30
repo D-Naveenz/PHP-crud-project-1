@@ -1,5 +1,5 @@
 <?php
-include "core/config.php";
+require_once "core/config.php";
 
 // start the session
 session_start();
@@ -13,7 +13,6 @@ $_SESSION['previous_page'] = getAbsUrl();
     <meta charset="UTF-8">
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet"
@@ -44,8 +43,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $userid = $_POST['userid'];
         $pass = $_POST['password'];
 
-        header("Location: ./patient/delete.php?id=PT0005");
-        //header("Location: ./patient/edit.php?create");
+        //header("Location: ./patient/delete.php?id=PT0005");
+        //header("Location: ./patient/view.php?id=PT0001");
+        header("Location: ./beds.php");
     }
 }
 ?>
@@ -105,10 +105,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         <input type="hidden" class="form-control" name="role" required />
                     </div>
                     <div class="form-group" id="sec_id">
-                        <input type="text" class="form-control" name="userid" placeholder="?Staff? ID" required />
+                        <label>
+                            <input type="text" class="form-control" name="userid" placeholder="?Staff? ID" required />
+                        </label>
                     </div>
                     <div class="form-group" id="sec_pass">
-                        <input type="password" class="form-control" name="password" placeholder="Password" required />
+                        <label>
+                            <input type="password" class="form-control" name="password" placeholder="Password" required />
+                        </label>
                     </div>
                 </div>
                 <div class="modal-footer">
