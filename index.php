@@ -3,6 +3,22 @@ require_once "core/config.php";
 
 // generate session variables to locate the current page
 $_SESSION['previous_page'] = getAbsUrl();
+
+// define variables and set to empty values
+$role = $userid = $pass = "";
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    if (isset($_POST['btnLogin'])) {
+        $role = $_POST['role'];
+        $userid = $_POST['userid'];
+        $pass = $_POST['password'];
+
+        //header("Location: ./patient/edit.php");
+        //header("Location: ./patient/view.php?id=PT0001");
+        //header("Location: ./beds.php");
+        header("Location: ./wards.php");
+    }
+}
 ?>
 <!doctype html>
 <html lang="en">
@@ -31,24 +47,6 @@ $_SESSION['previous_page'] = getAbsUrl();
     <title>Group 10 - Take home assignment</title>
 </head>
 <body>
-<?php
-// define variables and set to empty values
-$role = $userid = $pass = "";
-
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    if (isset($_POST['btnLogin'])) {
-        $role = $_POST['role'];
-        $userid = $_POST['userid'];
-        $pass = $_POST['password'];
-
-        //header("Location: ./patient/edit.php");
-        //header("Location: ./patient/view.php?id=PT0001");
-        //header("Location: ./beds.php");
-        header("Location: ./drugs.php");
-    }
-}
-?>
-
 <!-- Body Header -->
 <div class="container-fluid p-5 bg-primary text-white text-center">
     <h1>Suwa Sahana Private Hospital</h1>

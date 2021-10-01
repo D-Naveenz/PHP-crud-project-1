@@ -79,7 +79,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <!-- Crud Page Script -->
     <script type="text/javascript" src="js/crud_page.js"></script>
 
-    <title>Beds Details</title>
+    <title>Beds</title>
 </head>
 <body>
 <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
