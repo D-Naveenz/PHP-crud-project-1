@@ -45,7 +45,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         //header("Location: ./patient/edit.php");
         //header("Location: ./patient/view.php?id=PT0001");
-        header("Location: ./beds.php");
+        //header("Location: ./beds.php");
+        header("Location: ./drugs.php");
     }
 }
 ?>

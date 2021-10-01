@@ -10,7 +10,7 @@ const DB_NAME = 'hospital';
 
 // Attempt to connect to the MySQL database
 function createMySQLConn() {
-    mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+    //mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
     $conn = new mysqli(DB_SEVER, DB_USERNAME, DB_PASSWORD, DB_NAME);
 // Check connection
     if ($conn->connect_error)
