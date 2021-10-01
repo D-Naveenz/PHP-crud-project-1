@@ -26,12 +26,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $sql = "INSERT INTO bed (Bed_ID, Ward_ID, Availability) VALUES (?,?,?)";
         $sql_statement = $database->prepare($sql);
         // bind param with references : https://www.php.net/manual/en/language.references.whatare.php
-        $sql_statement->bind_param("ssi", $bedId, $wardId, $available);
-        $bedId = $_POST['bedId'];
-        $wardId = $_POST['wardId'];
-        $available = $_POST['available'];
+        $sql_statement->bind_param("ssi", $Val1, $Val2, $Val3);
+        $Val1 = $_POST['Val1'];
+        $Val2 = $_POST['Val2'];
+        $Val3 = $_POST['Val3'];
         // Execution
-        generateInfoMsg($sql_statement, $sql_statement->execute(),"bed", $_POST['bedId'], "added");
+        generateInfoMsg($sql_statement, $sql_statement->execute(),"bed", $_POST['Val1'], "added");
         $sql_statement->close();
 
         // reload the page
@@ -43,12 +43,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $sql = "UPDATE bed SET Ward_ID = ?, Availability = ? WHERE bed.Bed_ID = ?;";
         $sql_statement = $database->prepare($sql);
         // bind param with references : https://www.php.net/manual/en/language.references.whatare.php
-        $sql_statement->bind_param("sis", $wardId, $available, $bedId);
-        $bedId = $_POST['bedId'];
-        $wardId = $_POST['wardId'];
-        $available = $_POST['available'];
+        $sql_statement->bind_param("sis", $Val2, $Val3, $Val1);
+        $Val1 = $_POST['Val1'];
+        $Val2 = $_POST['Val2'];
+        $Val3 = $_POST['Val3'];
         // Execution
-        generateInfoMsg($sql_statement, $sql_statement->execute(),"bed", $_POST['bedId'], "updated");
+        generateInfoMsg($sql_statement, $sql_statement->execute(),"bed", $_POST['Val1'], "updated");
         $sql_statement->close();
 
         // reload the page
@@ -154,20 +154,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <td>
                                 <?=$row['Bed_ID']?>
                                 <label>
-                                    <input type="hidden" class="form-control" name="bedId" value="<?=$row['Bed_ID']?>">
+                                    <input type="hidden" class="form-control" name="Val1" value="<?=$row['Bed_ID']?>">
                                 </label>
                             </td>
                             <td>
                                 <label>
-                                    <input type="text" class="form-control" name="wardId" value="<?=$row['Ward_ID']?>">
+                                    <input type="text" class="form-control" name="Val2" value="<?=$row['Ward_ID']?>">
                                 </label>
                             </td>
                             <td>
                                 <div class="btn-group" role="group" aria-label="Update availability">
-                                    <input type="radio" class="btn-check" name="available" id="upt-av<?=$row_count*2-1?>" autocomplete="off" value="1" <?=$row['Availability']? 'checked':''?>>
+                                    <input type="radio" class="btn-check" name="Val3" id="upt-av<?=$row_count*2-1?>" autocomplete="off" value="1" <?=$row['Availability']? 'checked':''?>>
                                     <label class="btn btn-outline-primary" for="upt-av<?=$row_count*2-1?>">Yes</label>
 
-                                    <input type="radio" class="btn-check" name="available" id="upt-av<?=$row_count*2?>" autocomplete="off" value="0" <?=$row['Availability']?: 'checked'?>>
+                                    <input type="radio" class="btn-check" name="Val3" id="upt-av<?=$row_count*2?>" autocomplete="off" value="0" <?=$row['Availability']?: 'checked'?>>
                                     <label class="btn btn-outline-primary" for="upt-av<?=$row_count*2?>">No</label>
                                 </div>
                             </td>
@@ -182,20 +182,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <tr id="row-add" class="add-row table-info">
                         <td>
                             <label>
-                                <input type="text" class="form-control" name="bedId"">
+                                <input type="text" class="form-control" name="Val1"">
                             </label>
                         </td>
                         <td>
                             <label>
-                                <input type="text" class="form-control" name="wardId"">
+                                <input type="text" class="form-control" name="Val2"">
                             </label>
                         </td>
                         <td>
                             <div class="btn-group" role="group" aria-label="Select availability">
-                                <input type="radio" class="btn-check" name="available" id="add-av1" autocomplete="off" value="1" checked>
+                                <input type="radio" class="btn-check" name="Val3" id="add-av1" autocomplete="off" value="1" checked>
                                 <label class="btn btn-outline-primary" for="add-av1">Yes</label>
 
-                                <input type="radio" class="btn-check" name="available" id="add-av2" autocomplete="off" value="0">
+                                <input type="radio" class="btn-check" name="Val3" id="add-av2" autocomplete="off" value="0">
                                 <label class="btn btn-outline-primary" for="add-av2">No</label>
                             </div>
                         </td>

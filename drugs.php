@@ -26,14 +26,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $sql = "INSERT INTO drug (Drug_Code, Name, Unit_Cost, Type, Treatment_Code) VALUES (?,?,?,?,?)";
         $sql_statement = $database->prepare($sql);
         // bind param with references : https://www.php.net/manual/en/language.references.whatare.php
-        $sql_statement->bind_param("ssiss", $dCode, $dName, $dUCost, $dType, $dTCode);
-        $dCode = $_POST['drugCode'];
-        $dName = $_POST['dName'];
-        $dUCost = $_POST['dUCost'];
-        $dType = $_POST['dType'];
-        $dTCode = $_POST['dTCode'];
+        $sql_statement->bind_param("ssiss", $dCode, $Val2, $Val3, $Val4, $Val5);
+        $dCode = $_POST['Val1'];
+        $Val2 = $_POST['Val2'];
+        $Val3 = $_POST['Val3'];
+        $Val4 = $_POST['Val4'];
+        $Val5 = $_POST['Val5'];
         // Execution
-        generateInfoMsg($sql_statement, $sql_statement->execute(),"drug", $_POST['drugCode'], "added");
+        generateInfoMsg($sql_statement, $sql_statement->execute(),"drug", $_POST['Val1'], "added");
         $sql_statement->close();
 
         // reload the page
@@ -45,14 +45,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $sql = "UPDATE drug SET Name = ?, Unit_Cost = ?, Type = ?, Treatment_Code = ? WHERE drug.Drug_Code = ?;";
         $sql_statement = $database->prepare($sql);
         // bind param with references : https://www.php.net/manual/en/language.references.whatare.php
-        $sql_statement->bind_param("sisss", $dName, $dUCost, $dType, $dTCode, $dCode);
-        $dCode = $_POST['drugCode'];
-        $dName = $_POST['dName'];
-        $dUCost = $_POST['dUCost'];
-        $dType = $_POST['dType'];
-        $dTCode = $_POST['dTCode'];
+        $sql_statement->bind_param("sisss", $Val2, $Val3, $Val4, $Val5, $dCode);
+        $dCode = $_POST['Val1'];
+        $Val2 = $_POST['Val2'];
+        $Val3 = $_POST['Val3'];
+        $Val4 = $_POST['Val4'];
+        $Val5 = $_POST['Val5'];
         // Execution
-        generateInfoMsg($sql_statement, $sql_statement->execute(),"drug", $_POST['drugCode'], "updated");
+        generateInfoMsg($sql_statement, $sql_statement->execute(),"drug", $_POST['Val1'], "updated");
         $sql_statement->close();
 
         // reload the page
@@ -164,27 +164,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <td>
                                 <?=$row['Drug_Code']?>
                                 <label>
-                                    <input type="hidden" class="form-control" name="drugCode" value="<?=$row['Drug_Code']?>">
+                                    <input type="hidden" class="form-control" name="Val1" value="<?=$row['Drug_Code']?>">
                                 </label>
                             </td>
                             <td>
                                 <label>
-                                    <input type="text" class="form-control" name="dName" value="<?=$row['Name']?>">
+                                    <input type="text" class="form-control" name="Val2" value="<?=$row['Name']?>">
                                 </label>
                             </td>
                             <td>
                                 <label>
-                                    <input type="text" class="form-control" name="dUCost" value="<?=$row['Unit_Cost']?>">
+                                    <input type="text" class="form-control" name="Val3" value="<?=$row['Unit_Cost']?>">
                                 </label>
                             </td>
                             <td>
                                 <label>
-                                    <input type="text" class="form-control" name="dType" value="<?=$row['Type']?>">
+                                    <input type="text" class="form-control" name="Val4" value="<?=$row['Type']?>">
                                 </label>
                             </td>
                             <td>
                                 <label>
-                                    <input type="text" class="form-control" name="dTCode" value="<?=$row['Treatment_Code']?>">
+                                    <input type="text" class="form-control" name="Val5" value="<?=$row['Treatment_Code']?>">
                                 </label>
                             </td>
                             <td>
@@ -198,27 +198,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <tr id="row-add" class="add-row table-info">
                         <td>
                             <label>
-                                <input type="text" class="form-control" name="drugCode"">
+                                <input type="text" class="form-control" name="Val1"">
                             </label>
                         </td>
                         <td>
                             <label>
-                                <input type="text" class="form-control" name="dName"">
+                                <input type="text" class="form-control" name="Val2"">
                             </label>
                         </td>
                         <td>
                             <label>
-                                <input type="text" class="form-control" name="dUCost">
+                                <input type="text" class="form-control" name="Val3">
                             </label>
                         </td>
                         <td>
                             <label>
-                                <input type="text" class="form-control" name="dType">
+                                <input type="text" class="form-control" name="Val4">
                             </label>
                         </td>
                         <td>
                             <label>
-                                <input type="text" class="form-control" name="dTCode">
+                                <input type="text" class="form-control" name="Val5">
                             </label>
                         </td>
                         <td>

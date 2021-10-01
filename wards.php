@@ -26,12 +26,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $sql = "INSERT INTO ward (Ward_ID, Name, PCU_ID) VALUES (?,?,?)";
         $sql_statement = $database->prepare($sql);
         // bind param with references : https://www.php.net/manual/en/language.references.whatare.php
-        $sql_statement->bind_param("sss", $wardId, $wName, $wPCU);
-        $wardId = $_POST['wardId'];
-        $wName = $_POST['wName'];
-        $wPCU = $_POST['wPCU'];
+        $sql_statement->bind_param("sss", $Val1, $Val2, $Val3);
+        $Val1 = $_POST['Val1'];
+        $Val2 = $_POST['Val2'];
+        $Val3 = $_POST['Val3'];
         // Execution
-        generateInfoMsg($sql_statement, $sql_statement->execute(),"ward", $_POST['wardId'], "added");
+        generateInfoMsg($sql_statement, $sql_statement->execute(),"ward", $_POST['Val1'], "added");
         $sql_statement->close();
 
         // reload the page
@@ -43,12 +43,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $sql = "UPDATE ward SET Name = ?, PCU_ID = ? WHERE ward.Ward_ID = ?;";
         $sql_statement = $database->prepare($sql);
         // bind param with references : https://www.php.net/manual/en/language.references.whatare.php
-        $sql_statement->bind_param("sss", $wName, $wPCU, $wardId);
-        $wardId = $_POST['wardId'];
-        $wName = $_POST['wName'];
-        $wPCU = $_POST['wPCU'];
+        $sql_statement->bind_param("sss", $Val2, $Val3, $Val1);
+        $Val1 = $_POST['Val1'];
+        $Val2 = $_POST['Val2'];
+        $Val3 = $_POST['Val3'];
         // Execution
-        generateInfoMsg($sql_statement, $sql_statement->execute(),"ward", $_POST['wardId'], "updated");
+        generateInfoMsg($sql_statement, $sql_statement->execute(),"ward", $_POST['Val1'], "updated");
         $sql_statement->close();
 
         // reload the page
@@ -154,17 +154,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <td>
                                 <?=$row['Ward_ID']?>
                                 <label>
-                                    <input type="hidden" class="form-control" name="wardId" value="<?=$row['Ward_ID']?>">
+                                    <input type="hidden" class="form-control" name="Val1" value="<?=$row['Ward_ID']?>">
                                 </label>
                             </td>
                             <td>
                                 <label>
-                                    <input type="text" class="form-control" name="wName" value="<?=$row['Name']?>">
+                                    <input type="text" class="form-control" name="Val2" value="<?=$row['Name']?>">
                                 </label>
                             </td>
                             <td>
                                 <label>
-                                    <input type="text" class="form-control" name="wPCU" value="<?=$row['PCU_ID']?>">
+                                    <input type="text" class="form-control" name="Val3" value="<?=$row['PCU_ID']?>">
                                 </label>
                             </td>
                             <td>
@@ -178,17 +178,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <tr id="row-add" class="add-row table-info">
                         <td>
                             <label>
-                                <input type="text" class="form-control" name="wardId"">
+                                <input type="text" class="form-control" name="Val1"">
                             </label>
                         </td>
                         <td>
                             <label>
-                                <input type="text" class="form-control" name="wName"">
+                                <input type="text" class="form-control" name="Val2"">
                             </label>
                         </td>
                         <td>
                             <label>
-                                <input type="text" class="form-control" name="wPCU"">
+                                <input type="text" class="form-control" name="Val3"">
                             </label>
                         </td>
                         <td>
