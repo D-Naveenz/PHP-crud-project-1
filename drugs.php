@@ -120,7 +120,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 <!-- Body Header -->
 <div class="container-fluid p-5 bg-primary text-white text-center">
-    <h1>List of Drugss</h1>
+    <h1>List of Drugs</h1>
     <p>Suwa Sahana Hospital</p>
 </div>
 <!-- Body Header -->

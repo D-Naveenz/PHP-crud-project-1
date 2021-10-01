@@ -26,7 +26,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $sql = "INSERT INTO bed (Bed_ID, Ward_ID, Availability) VALUES (?,?,?)";
         $sql_statement = $database->prepare($sql);
         // bind param with references : https://www.php.net/manual/en/language.references.whatare.php
-        $sql_statement->bind_param("sss", $bedId, $wardId, $available);
+        $sql_statement->bind_param("ssi", $bedId, $wardId, $available);
         $bedId = $_POST['bedId'];
         $wardId = $_POST['wardId'];
         $available = $_POST['available'];

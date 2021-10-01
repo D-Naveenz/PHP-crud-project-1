@@ -8,12 +8,12 @@ require_once "core/config.php";
 
 // Connect to the database
 $database = createMySQLConn();
-$res_select = $database->query("SELECT * FROM `vendor`");
+$res_select = $database->query("SELECT * FROM `diagnosticunit`");
 
 // Delete Request
 if (isset($_GET['delete']) && !empty($_GET['delete'])) {
-    $regNo = $_GET['delete'];
-    generateInfoMsg($database, $database->query("DELETE FROM vendor WHERE Reg_No = '$regNo'"),"vendor", $regNo, "deleted");
+    $id = $_GET['delete'];
+    generateInfoMsg($database, $database->query("DELETE FROM diagnosticunit WHERE Unit_ID = '$id'"),"diagnostic unit", $id, "deleted");
 
     // reload the page
     header("Location: ".$_SERVER["PHP_SELF"]."?message");
@@ -23,16 +23,15 @@ if (isset($_GET['delete']) && !empty($_GET['delete'])) {
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_POST['btnAdd'])) {
         // Create request
-        $sql = "INSERT INTO vendor (Reg_No, Name, Address, ContactNo) VALUES (?,?,?,?)";
+        $sql = "INSERT INTO diagnosticunit (Unit_ID, Name, PCU_ID) VALUES (?,?,?)";
         $sql_statement = $database->prepare($sql);
         // bind param with references : https://www.php.net/manual/en/language.references.whatare.php
-        $sql_statement->bind_param("ssss", $regNo, $vName, $vAddress, $vContact);
-        $regNo = $_POST['regNo'];
-        $vName = $_POST['vName'];
-        $vAddress = $_POST['vAddress'];
-        $vContact = $_POST['vContact'];
+        $sql_statement->bind_param("sss", $unitID, $dName, $dPCU);
+        $unitID = $_POST['unitID'];
+        $dName = $_POST['dName'];
+        $dPCU = $_POST['dPCU'];
         // Execution
-        generateInfoMsg($sql_statement, $sql_statement->execute(),"vendor", $_POST['regNo'], "added");
+        generateInfoMsg($sql_statement, $sql_statement->execute(),"diagnostic unit", $_POST['unitID'], "added");
         $sql_statement->close();
 
         // reload the page
@@ -40,17 +39,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     if (isset($_POST['btnUpdate'])) {
-        // Update request
-        $sql = "UPDATE vendor SET Name = ?, Address = ?, ContactNo = ? WHERE vendor.Reg_No = ?;";
+        // Create request
+        $sql = "UPDATE diagnosticunit SET Name = ?, PCU_ID = ? WHERE diagnosticunit.Unit_ID = ?;";
         $sql_statement = $database->prepare($sql);
         // bind param with references : https://www.php.net/manual/en/language.references.whatare.php
-        $sql_statement->bind_param("ssss", $vName, $vAddress, $vContact, $regNo);
-        $regNo = $_POST['regNo'];
-        $vName = $_POST['vName'];
-        $vAddress = $_POST['vAddress'];
-        $vContact = $_POST['vContact'];
+        $sql_statement->bind_param("sss", $dName, $dPCU, $unitID);
+        $unitID = $_POST['unitID'];
+        $dName = $_POST['dName'];
+        $dPCU = $_POST['dPCU'];
         // Execution
-        generateInfoMsg($sql_statement, $sql_statement->execute(),"vendor", $_POST['regNo'], "updated");
+        generateInfoMsg($sql_statement, $sql_statement->execute(),"diagnostic unit", $_POST['unitID'], "updated");
         $sql_statement->close();
 
         // reload the page
@@ -78,10 +76,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             crossorigin="anonymous">
     </script>
 
-    <!-- Crud page Script -->
+    <!-- Crud Page Script -->
     <script type="text/javascript" src="js/crud_page.js"></script>
 
-    <title>Vendors</title>
+    <title>Diagnostic Units</title>
 </head>
 <body>
 <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
@@ -118,7 +116,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 <!-- Body Header -->
 <div class="container-fluid p-5 bg-primary text-white text-center">
-    <h1>List of Vendors</h1>
+    <h1>List of Diagnostic Units</h1>
     <p>Suwa Sahana Hospital</p>
 </div>
 <!-- Body Header -->
@@ -127,17 +125,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <div class="container">
         <div class="row justify-content-center">
             <table class="table table-hover">
-                <col style="width: 16%;" />
-                <col style="width: 16%;" />
-                <col style="width: 16%;" />
-                <col style="width: 16%;" />
-                <col style="width: 16%;" />
+                <col style="width: 27%;" />
+                <col style="width: 27%;" />
+                <col style="width: 27%;" />
+                <col style="width: 19%;" />
                 <thead style="background-color: blue; color: white">
                 <tr>
-                    <th scope="col">Register Number</th>
+                    <th scope="col">Unit ID</th>
                     <th scope="col">Name</th>
-                    <th scope="col">Address</th>
-                    <th scope="col">Contact Number</th>
+                    <th scope="col">PCU ID</th>
                     <th scope="col">Actions</th>
                 </tr>
                 </thead>
@@ -145,36 +141,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $row_count = 0;
                 while ($row = $res_select->fetch_assoc()): ?>
                     <tr id="row-<?=$row_count?>">
-                        <td><?=$row['Reg_No']?></td>
+                        <td><?=$row['Unit_ID']?></td>
                         <td><?=$row['Name']?></td>
-                        <td><?=$row['Address']?></td>
-                        <td><?=$row['ContactNo']?></td>
+                        <td><?=$row['PCU_ID']?></td>
                         <td>
                             <a href="#row-edit-<?=$row_count?>" class="btn btn-info data-row-toggle">Edit</a>
-                            <a href="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>?delete=<?=$row['Reg_No']?>" class="btn btn-danger">Delete</a>
+                            <a href="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>?delete=<?=$row['Unit_ID']?>" class="btn btn-danger">Delete</a>
                         </td>
                     </tr>
                     <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
                         <tr id="row-edit-<?=$row_count?>" class="update-row">
                             <td>
-                                <?=$row['Reg_No']?>
+                                <?=$row['Unit_ID']?>
                                 <label>
-                                    <input type="hidden" class="form-control" name="regNo" value="<?=$row['Reg_No']?>">
+                                    <input type="hidden" class="form-control" name="unitID" value="<?=$row['Unit_ID']?>">
                                 </label>
                             </td>
                             <td>
                                 <label>
-                                    <input type="text" class="form-control" name="vName" value="<?=$row['Name']?>">
+                                    <input type="text" class="form-control" name="dName" value="<?=$row['Name']?>">
                                 </label>
                             </td>
                             <td>
                                 <label>
-                                    <input type="text" class="form-control" name="vAddress" value="<?=$row['Address']?>">
-                                </label>
-                            </td>
-                            <td>
-                                <label>
-                                    <input type="text" class="form-control" name="vContact" value="<?=$row['ContactNo']?>">
+                                    <input type="text" class="form-control" name="dPCU" value="<?=$row['PCU_ID']?>">
                                 </label>
                             </td>
                             <td>
@@ -188,22 +178,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <tr id="row-add" class="add-row table-info">
                         <td>
                             <label>
-                                <input type="text" class="form-control" name="regNo"">
+                                <input type="text" class="form-control" name="unitID"">
                             </label>
                         </td>
                         <td>
                             <label>
-                                <input type="text" class="form-control" name="vName"">
+                                <input type="text" class="form-control" name="dName"">
                             </label>
                         </td>
                         <td>
                             <label>
-                                <input type="text" class="form-control" name="vAddress">
-                            </label>
-                        </td>
-                        <td>
-                            <label>
-                                <input type="text" class="form-control" name="vContact">
+                                <input type="text" class="form-control" name="dPCU">
                             </label>
                         </td>
                         <td>
