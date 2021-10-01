@@ -8,12 +8,12 @@ require_once "core/config.php";
 
 // Connect to the database
 $database = createMySQLConn();
-$res_select = $database->query("SELECT * FROM `drug`");
+$res_select = $database->query("SELECT * FROM `vendor`");
 
 // Delete Request
 if (isset($_GET['delete']) && !empty($_GET['delete'])) {
-    $dCode = $_GET['delete'];
-    generateInfoMsg($database, $database->query("DELETE FROM drug WHERE Drug_Code = '$dCode'"),"drug", $dCode, "deleted");
+    $regNo = $_GET['delete'];
+    generateInfoMsg($database, $database->query("DELETE FROM vendor WHERE Reg_No = '$regNo'"),"vendor", $regNo, "deleted");
 
     // reload the page
     header("Location: ".$_SERVER["PHP_SELF"]."?message");
@@ -23,17 +23,16 @@ if (isset($_GET['delete']) && !empty($_GET['delete'])) {
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_POST['btnAdd'])) {
         // Create request
-        $sql = "INSERT INTO drug (Drug_Code, Name, Unit_Cost, Type, Treatment_Code) VALUES (?,?,?,?,?)";
+        $sql = "INSERT INTO vendor (Reg_No, Name, Address, ContactNo) VALUES (?,?,?,?)";
         $sql_statement = $database->prepare($sql);
         // bind param with references : https://www.php.net/manual/en/language.references.whatare.php
-        $sql_statement->bind_param("ssiss", $dCode, $dName, $dUCost, $dType, $dTCode);
-        $dCode = $_POST['drugCode'];
-        $dName = $_POST['dName'];
-        $dUCost = $_POST['dUCost'];
-        $dType = $_POST['dType'];
-        $dTCode = $_POST['dTCode'];
+        $sql_statement->bind_param("ssss", $regNo, $vName, $vAddress, $vContact);
+        $regNo = $_POST['regNo'];
+        $vName = $_POST['vName'];
+        $vAddress = $_POST['vAddress'];
+        $vContact = $_POST['vContact'];
         // Execution
-        generateInfoMsg($sql_statement, $sql_statement->execute(),"drug", $_POST['drugCode'], "added");
+        generateInfoMsg($sql_statement, $sql_statement->execute(),"vendor", $_POST['regNo'], "added");
         $sql_statement->close();
 
         // reload the page
@@ -42,17 +41,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if (isset($_POST['btnUpdate'])) {
         // Update request
-        $sql = "UPDATE drug SET Name = ?, Unit_Cost = ?, Type = ?, Treatment_Code = ? WHERE drug.Drug_Code = ?;";
+        $sql = "UPDATE vendor SET Name = ?, Address = ?, ContactNo = ? WHERE vendor.Reg_No = ?;";
         $sql_statement = $database->prepare($sql);
         // bind param with references : https://www.php.net/manual/en/language.references.whatare.php
-        $sql_statement->bind_param("sisss", $dName, $dUCost, $dType, $dTCode, $dCode);
-        $dCode = $_POST['drugCode'];
-        $dName = $_POST['dName'];
-        $dUCost = $_POST['dUCost'];
-        $dType = $_POST['dType'];
-        $dTCode = $_POST['dTCode'];
+        $sql_statement->bind_param("ssss", $vName, $vAddress, $vContact, $regNo);
+        $regNo = $_POST['regNo'];
+        $vName = $_POST['vName'];
+        $vAddress = $_POST['vAddress'];
+        $vContact = $_POST['vContact'];
         // Execution
-        generateInfoMsg($sql_statement, $sql_statement->execute(),"drug", $_POST['drugCode'], "updated");
+        generateInfoMsg($sql_statement, $sql_statement->execute(),"vendor", $_POST['regNo'], "updated");
         $sql_statement->close();
 
         // reload the page
@@ -134,14 +132,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <col style="width: 16%;" />
                 <col style="width: 16%;" />
                 <col style="width: 16%;" />
-                <col style="width: 20%;" />
                 <thead style="background-color: blue; color: white">
                 <tr>
                     <th scope="col">Drug Code</th>
                     <th scope="col">Name</th>
                     <th scope="col">Unit Cost</th>
                     <th scope="col">Type</th>
-                    <th scope="col">Treatment Code</th>
                     <th scope="col">Actions</th>
                 </tr>
                 </thead>
@@ -149,42 +145,36 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $row_count = 0;
                 while ($row = $res_select->fetch_assoc()): ?>
                     <tr id="row-<?=$row_count?>">
-                        <td><?=$row['Drug_Code']?></td>
+                        <td><?=$row['Reg_No']?></td>
                         <td><?=$row['Name']?></td>
-                        <td><?=$row['Unit_Cost']?></td>
-                        <td><?=$row['Type']?></td>
-                        <td><?=$row['Treatment_Code']?></td>
+                        <td><?=$row['Address']?></td>
+                        <td><?=$row['ContactNo']?></td>
                         <td>
                             <a href="#row-edit-<?=$row_count?>" class="btn btn-info data-row-toggle">Edit</a>
-                            <a href="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>?delete=<?=$row['Drug_Code']?>" class="btn btn-danger">Delete</a>
+                            <a href="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>?delete=<?=$row['Reg_No']?>" class="btn btn-danger">Delete</a>
                         </td>
                     </tr>
                     <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
                         <tr id="row-edit-<?=$row_count?>" class="update-row">
                             <td>
-                                <?=$row['Drug_Code']?>
+                                <?=$row['Reg_No']?>
                                 <label>
-                                    <input type="hidden" class="form-control" name="drugCode" value="<?=$row['Drug_Code']?>">
+                                    <input type="hidden" class="form-control" name="regNo" value="<?=$row['Reg_No']?>">
                                 </label>
                             </td>
                             <td>
                                 <label>
-                                    <input type="text" class="form-control" name="dName" value="<?=$row['Name']?>">
+                                    <input type="text" class="form-control" name="vName" value="<?=$row['Name']?>">
                                 </label>
                             </td>
                             <td>
                                 <label>
-                                    <input type="text" class="form-control" name="dUCost" value="<?=$row['Unit_Cost']?>">
+                                    <input type="text" class="form-control" name="vAddress" value="<?=$row['Address']?>">
                                 </label>
                             </td>
                             <td>
                                 <label>
-                                    <input type="text" class="form-control" name="dType" value="<?=$row['Type']?>">
-                                </label>
-                            </td>
-                            <td>
-                                <label>
-                                    <input type="text" class="form-control" name="dTCode" value="<?=$row['Treatment_Code']?>">
+                                    <input type="text" class="form-control" name="vContact" value="<?=$row['ContactNo']?>">
                                 </label>
                             </td>
                             <td>
@@ -198,27 +188,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <tr id="row-add" class="add-row table-info">
                         <td>
                             <label>
-                                <input type="text" class="form-control" name="drugCode"">
+                                <input type="text" class="form-control" name="regNo"">
                             </label>
                         </td>
                         <td>
                             <label>
-                                <input type="text" class="form-control" name="dName"">
+                                <input type="text" class="form-control" name="vName"">
                             </label>
                         </td>
                         <td>
                             <label>
-                                <input type="text" class="form-control" name="dUCost">
+                                <input type="text" class="form-control" name="vAddress">
                             </label>
                         </td>
                         <td>
                             <label>
-                                <input type="text" class="form-control" name="dType">
-                            </label>
-                        </td>
-                        <td>
-                            <label>
-                                <input type="text" class="form-control" name="dTCode">
+                                <input type="text" class="form-control" name="vContact">
                             </label>
                         </td>
                         <td>

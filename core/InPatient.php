@@ -175,6 +175,18 @@ class InPatient extends Patient
 
     public static function getFreeBeds(): array
     {
-        return AvailableBeds();
+        $database = createMySQLConn();
+        $available_beds = array();
+        $sql = "SELECT `Bed_ID` FROM `bed` WHERE `Availability` = 1";
+        $result = $database->query($sql);
+
+        if ($result->num_rows > 0) {
+            // output data of each row
+            $count = 0;
+            while ($row = $result->fetch_assoc()) {
+                $available_beds[$count++] = $row["Bed_ID"];
+            }
+        }
+        return $available_beds;
     }
 }

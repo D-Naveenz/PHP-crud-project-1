@@ -49,23 +49,6 @@ function nextId($table, $id_col_name, $prefix) {
     return null;
 }
 
-function AvailableBeds(): array
-{
-    $database = createMySQLConn();
-    $available_beds = array();
-    $sql = "SELECT `Bed_ID` FROM `bed` WHERE `Availability` = 1";
-    $result = $database->query($sql);
-
-    if ($result->num_rows > 0) {
-        // output data of each row
-        $count = 0;
-        while ($row = $result->fetch_assoc()) {
-            $available_beds[$count++] = $row["Bed_ID"];
-        }
-    }
-    return $available_beds;
-}
-
 function isDateTimeStrNull(string $date_time_str): ?string
 {
     if ($date_time_str == "0000-00-00" || $date_time_str == "00-00") return null;
