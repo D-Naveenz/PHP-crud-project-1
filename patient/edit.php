@@ -8,10 +8,7 @@ session_start();
 
 // store session data with checking get requests
 $_SESSION['available_beds'] = InPatient::getFreeBeds();
-if (isset($_GET['create'])) {
-    // form is preparing to create the patient record
-    $_SESSION['patient'] = new Patient();
-} elseif (isset($_GET['update']) && !empty($_GET['update'])) {
+if (isset($_GET['update']) && !empty($_GET['update'])) {
     // form is preparing to update the patient record
     $_SESSION['patient'] = new Patient($_GET['update']);
 
@@ -22,6 +19,10 @@ if (isset($_GET['create'])) {
         // create new out-patient object with the same name
         $_SESSION['patient'] = new OutPatient($_SESSION['patient']->getPatientId());
     }
+} else {
+    // form is preparing to create the patient record
+    unset($_SESSION['patient']);
+    $_SESSION['patient'] = new Patient();
 }
 
 // Post requests
@@ -86,6 +87,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     <!-- Custom Javascript -->
     <script type="text/javascript">
+        let isInPatient = <?=($_SESSION['patient'] instanceof InPatient) ? 'true' : 'false'?>;
+
         function in_n_out_event() {
             if ($('#radPt1').is(':checked')) {
                 $('#nav-itm-2').show();
@@ -98,35 +101,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         window.onload = () => {
             // Initializing form elements
-            $('<?php echo ($_SESSION['patient'] instanceof InPatient) ? '#radPt1' : '#radPt2'; ?>').prop('checked', true);
+            $(isInPatient? '#radPt1' : '#radPt2').prop('checked', true);
             // disable the relevant from according to radio buttons' changes
             in_n_out_event();
 
-            <?php if (isset($_GET['update']) && !empty($_GET['update'])) { ?>
+            <?php if (isset($_GET['update']) && !empty($_GET['update'])): ?>
             // Initializing form elements according to the update request
             // hide save button
             $('#btn-req-create').hide();
-            <?php
-                if ($_SESSION['patient'] instanceof InPatient) {
-            ?>
-            $('#txtIn1').val("<?php echo $_SESSION['patient']->dob ?>");
-            $('#txtIn2-date').val("<?php echo $_SESSION['patient']->getAddDate() ?>");
-            $('#txtIn2-time').val("<?php echo $_SESSION['patient']->getAddTime() ?>");
-            $('#txtIn3-date').val("<?php echo $_SESSION['patient']->getDisDate() ?>");
-            $('#txtIn3-time').val("<?php echo $_SESSION['patient']->getDisTime() ?>");
-            $('#txtIn4').val("<?php echo $_SESSION['patient']->pc_doc ?>");
-            let option_text = "<?php echo $_SESSION['patient']->bed_id ?>";
-            $('#txtIn5').append(new Option(option_text, option_text, true, true));
-            <?php } else { ?>
-            $('#txtOut1-date').val("<?php echo $_SESSION['patient']->getArrDate() ?>");
-            $('#txtOut1-time').val("<?php echo $_SESSION['patient']->getArrTime() ?>");
-            <?php
-                }
+            if (isInPatient) {
+                $('#txtIn1').val("<?php echo $_SESSION['patient']->dob ?>");
+                $('#txtIn2-date').val("<?php echo $_SESSION['patient']->getAddDate() ?>");
+                $('#txtIn2-time').val("<?php echo $_SESSION['patient']->getAddTime() ?>");
+                $('#txtIn3-date').val("<?php echo $_SESSION['patient']->getDisDate() ?>");
+                $('#txtIn3-time').val("<?php echo $_SESSION['patient']->getDisTime() ?>");
+                $('#txtIn4').val("<?php echo $_SESSION['patient']->pc_doc ?>");
+                let option_text = "<?php echo $_SESSION['patient']->bed_id ?>";
+                $('#txtIn5').append(new Option(option_text, option_text, true, true));
             } else {
-            ?>
+                $('#txtOut1-date').val("<?php echo $_SESSION['patient']->getArrDate() ?>");
+                $('#txtOut1-time').val("<?php echo $_SESSION['patient']->getArrTime() ?>");
+            }
+            <?php else: ?>
             // hide update button
             $('#btn-req-update').hide();
-            <?php } ?>
+            <?php endif; ?>
         };
 
         $(document).ready(function () {
@@ -168,11 +167,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <body>
 <!-- Body Header -->
 <div class="container-fluid p-5 bg-primary text-white text-center">
-    <?php if (isset($_GET['update']) && !empty($_GET['update'])) { ?>
-        <h1>Update <?php echo $_SESSION['patient']->name ?></h1>
-    <?php } else { ?>
+    <?php if (isset($_GET['update']) && !empty($_GET['update'])): ?>
+        <h1>Update <?= $_SESSION['patient']->name ?></h1>
+    <?php else: ?>
         <h1>Add New Patient</h1>
-    <?php } ?>
+    <?php endif; ?>
     <p>Suwa Sahana Hospital</p>
 </div>
 

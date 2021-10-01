@@ -94,6 +94,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $(document).ready(() => {
             // hide all update divs
             $('.update-row').hide();
+            $('#row-add').hide();
 
             $(".data-row-toggle").click(function (e) {
                 e.preventDefault();
@@ -109,6 +110,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 let _this = target.replace("row-", "row-edit-");
                 $(_this).hide();
                 $(target).show();
+            });
+
+            $('#btn-add').click( function () {
+                $(this).hide("fast", function () {
+                    $('#row-add').show("slow");
+                });
+            })
+
+            $("button[name='btnCancel']").click(function () {
+                $('#row-add').hide("slow", function () {
+                    $('#btn-add').show("fast");
+                });
             });
         });
     </script>
@@ -130,7 +143,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 <?php if (isset($_SESSION['bed_msg']) && isset($_GET['message'])): ?>
     <!-- Display Alert -->
-    <div class="alert alert-<?=$_SESSION['bed_msg_type']?> alert-dismissible d-flex align-items-center fade show" role="alert">
+    <div class="alert alert-<?=$_SESSION['bed_msg_type']?> alert-dismissible d-flex align-items-center fade show mb-0" role="alert">
         <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Info:"><use xlink:href="#info-fill"/></svg>
         <div>
             <?php
@@ -206,42 +219,40 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             </td>
                         </tr>
                     </form>
-                <?php endwhile;
-                if (isset($_GET['Add'])): ?>
-                    <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
-                        <tr id="row-add" class="add-row table-info">
-                            <td>
-                                <label>
-                                    <input type="text" class="form-control" name="bedId"">
-                                </label>
-                            </td>
-                            <td>
-                                <label>
-                                    <input type="text" class="form-control" name="wardId"">
-                                </label>
-                            </td>
-                            <td>
-                                <div class="btn-group" role="group" aria-label="Select availability">
-                                    <input type="radio" class="btn-check" name="available" id="add-av1" autocomplete="off" value="1" checked>
-                                    <label class="btn btn-outline-primary" for="add-av1">Yes</label>
+                <?php endwhile; ?>
+                <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
+                    <tr id="row-add" class="add-row table-info">
+                        <td>
+                            <label>
+                                <input type="text" class="form-control" name="bedId"">
+                            </label>
+                        </td>
+                        <td>
+                            <label>
+                                <input type="text" class="form-control" name="wardId"">
+                            </label>
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group" aria-label="Select availability">
+                                <input type="radio" class="btn-check" name="available" id="add-av1" autocomplete="off" value="1" checked>
+                                <label class="btn btn-outline-primary" for="add-av1">Yes</label>
 
-                                    <input type="radio" class="btn-check" name="available" id="add-av2" autocomplete="off" value="0">
-                                    <label class="btn btn-outline-primary" for="add-av2">No</label>
-                                </div>
-                            </td>
-                            <td>
-                                <button type="submit" class="btn btn-success" name="btnAdd">Done</button>
-                                <button type="submit" class="btn btn-danger add-row-toggle" name="btnCancel">Cancel</button>
-                            </td>
-                        </tr>
-                    </form>
-                <?php endif; ?>
+                                <input type="radio" class="btn-check" name="available" id="add-av2" autocomplete="off" value="0">
+                                <label class="btn btn-outline-primary" for="add-av2">No</label>
+                            </div>
+                        </td>
+                        <td>
+                            <button type="submit" class="btn btn-success" name="btnAdd">Done</button>
+                            <button type="reset" class="btn btn-danger add-row-toggle" name="btnCancel">Cancel</button>
+                        </td>
+                    </tr>
+                </form>
             </table>
         </div>
     </div>
     <div class="container">
         <?php if (!isset($_GET['Add'])): ?>
-        <a href="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>?Add" class="btn btn-info btn-block">Add</a>
+        <a href="#row-add" class="btn btn-info btn-block" id="btn-add">Add</a>
         <?php endif; ?>
         <a href="<?php echo $_SESSION['previous_page']; ?>" class="btn btn-secondary btn-block">Close</a>
     </div>

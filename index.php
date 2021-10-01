@@ -43,7 +43,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $userid = $_POST['userid'];
         $pass = $_POST['password'];
 
-        //header("Location: ./patient/delete.php?id=PT0005");
+        //header("Location: ./patient/edit.php");
         //header("Location: ./patient/view.php?id=PT0001");
         header("Location: ./beds.php");
     }

@@ -6,21 +6,22 @@ require_once "../core/OutPatient.php";
 // start the session
 session_start();
 
-// Get requests
-// Check whether patient id is in the address
-if (isset($_GET['id']) && !empty($_GET['id'])) {
-    // form is preparing to update the patient record
-    $_SESSION['patient'] = new Patient($_GET['id']);
-
-    if ($_SESSION['patient']->isInPatient()) {
-        // create new in-patient object from the parent object
-        $_SESSION['patient'] = new InPatient($_SESSION['patient']->getPatientId());
-    } else {
-        // create new out-patient object with the same name
-        $_SESSION['patient'] = new OutPatient($_SESSION['patient']->getPatientId());
+// check whether patient is logged in to server
+if (!$_SESSION['patient']->isExistsInDb()) {
+    // Check whether patient id is in the address
+    if (isset($_GET['id']) && !empty($_GET['id'])) {
+        // form is preparing to update the patient record
+        $_SESSION['patient'] = new Patient($_GET['id']);
     }
 }
-else die("Patient ID is not here. There is nothing to show you!");
+
+if ($_SESSION['patient']->isInPatient()) {
+    // create new in-patient object from the parent object
+    $_SESSION['patient'] = new InPatient($_SESSION['patient']->getPatientId());
+} else {
+    // create new out-patient object with the same name
+    $_SESSION['patient'] = new OutPatient($_SESSION['patient']->getPatientId());
+}
 ?>
 
 <!doctype html>
@@ -55,17 +56,17 @@ else die("Patient ID is not here. There is nothing to show you!");
             <a class="nav-link active" id="pt-tab-1" data-bs-toggle="tab" href="#pt-tab-panel-1" role="tab"
                aria-controls="pt-tab-panel-1" aria-selected="true">Basic Information</a>
         </li>
-        <?php if ($_SESSION['patient'] instanceof InPatient) { ?>
+        <?php if ($_SESSION['patient'] instanceof InPatient): ?>
             <li class="nav-item" role="presentation" id="nav-itm-2">
                 <a class="nav-link id=" id="pt-tab-2" data-bs-toggle="tab" href="#pt-tab-panel-2" role="tab"
                    aria-controls="pt-tab-panel-2" aria-selected="false">In-patient status</a>
             </li>
-        <?php } else { ?>
+        <?php else: ?>
             <li class="nav-item" role="presentation" id="nav-itm-3">
                 <a class="nav-link id=" id="pt-tab-3" data-bs-toggle="tab" href="#pt-tab-panel-3" role="tab"
                    aria-controls="pt-tab-panel-3" aria-selected="false">Out-patient status</a>
             </li>
-        <?php } ?>
+        <?php endif; ?>
     </ul>
     <!-- Tabs navs -->
 
@@ -96,7 +97,7 @@ else die("Patient ID is not here. There is nothing to show you!");
         </div>
         <!-- 1st content -->
 
-        <?php if ($_SESSION['patient'] instanceof InPatient) { ?>
+        <?php if ($_SESSION['patient'] instanceof InPatient): ?>
             <!-- 2nd content: In-patient relation -->
             <div class="container tab-pane fade" id="pt-tab-panel-2" role="tabpanel" aria-labelledby="pt-tab-panel-2">
                 <div class="mb-3">
@@ -136,9 +137,7 @@ else die("Patient ID is not here. There is nothing to show you!");
                 </div>
             </div>
             <!-- 2nd content -->
-        <?php } ?>
-
-        <?php if ($_SESSION['patient'] instanceof OutPatient) { ?>
+        <?php elseif ($_SESSION['patient'] instanceof OutPatient): ?>
             <!-- 3rd content: Out-patient relation -->
             <div class="container tab-pane fade" id="pt-tab-panel-3" role="tabpanel" aria-labelledby="pt-tab-panel-3">
                 <div class="mb-3">
@@ -158,7 +157,7 @@ else die("Patient ID is not here. There is nothing to show you!");
                 </div>
             </div>
             <!-- 3rd content -->
-        <?php } ?>
+        <?php endif; ?>
     </div>
     <!-- Tabs content -->
     <div class="container">
