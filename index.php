@@ -7,6 +7,7 @@ $_SESSION['previous_page'] = getAbsUrl();
 // define variables and set to empty values
 $role = $userid = $pass = "";
 
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_POST['btnLogin'])) {
         $role = $_POST['role'];
@@ -16,7 +17,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         //header("Location: ./patient/edit.php");
         //header("Location: ./patient/view.php?id=PT0001");
         //header("Location: ./beds.php");
-        header("Location: ./tests.php");
+        header("Location: ./supplies.php");
     }
 }
 ?>
