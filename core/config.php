@@ -1,4 +1,7 @@
 <?php
+// start the session
+session_start();
+
 // Application constraints
 const max_id_nums = 4;
 
@@ -78,4 +81,15 @@ function getAbsUrl(): string
         $url .= "?".$query;
     }
     return $url;
+}
+
+function generateInfoMsg(mysqli|mysqli_stmt $mysqli_var, bool $result, $record_type, $id, $action) {
+    if ($result) {
+        // reporting
+        $_SESSION['res_msg'] = "The record of the ".$record_type." (id: $id) has been $action.";
+        $_SESSION['res_msg_type'] = "success";
+    } else {
+        $_SESSION['res_msg'] = "The record couldn't be $action. Error: $mysqli_var->error";
+        $_SESSION['res_msg_type'] = "danger";
+    }
 }

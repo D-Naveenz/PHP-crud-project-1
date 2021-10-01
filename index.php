@@ -1,8 +1,6 @@
 <?php
 require_once "core/config.php";
 
-// start the session
-session_start();
 // generate session variables to locate the current page
 $_SESSION['previous_page'] = getAbsUrl();
 ?>

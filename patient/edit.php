@@ -3,9 +3,6 @@ require_once "../core/Patient.php";
 require_once "../core/InPatient.php";
 require_once "../core/OutPatient.php";
 
-// start the session
-session_start();
-
 // store session data with checking get requests
 $_SESSION['available_beds'] = InPatient::getFreeBeds();
 if (isset($_GET['update']) && !empty($_GET['update'])) {

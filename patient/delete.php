@@ -3,9 +3,6 @@ require_once "../core/Patient.php";
 require_once "../core/InPatient.php";
 require_once "../core/OutPatient.php";
 
-// start the session
-session_start();
-
 // store session data with checking get requests
 if (isset($_GET['id']) && !empty($_GET['id'])) {
     // form is preparing to delete the patient record

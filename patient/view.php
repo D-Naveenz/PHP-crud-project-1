@@ -3,9 +3,6 @@ require_once "../core/Patient.php";
 require_once "../core/InPatient.php";
 require_once "../core/OutPatient.php";
 
-// start the session
-session_start();
-
 // check whether patient is logged in to server
 if (!$_SESSION['patient']->isExistsInDb()) {
     // Check whether patient id is in the address

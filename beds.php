@@ -1,24 +1,19 @@
 <?php
+/*
+ * PHP CRUD Template v1.0
+ * Developed by Naveen Dharmathunga
+ * GitHub: https://github.com/D-Naveenz
+ */
 require_once "core/config.php";
 
-// start the session
-session_start();
-
+// Connect to the database
 $database = createMySQLConn();
 $res_select = $database->query("SELECT * FROM `bed`");
 
 // Delete Request
 if (isset($_GET['delete']) && !empty($_GET['delete'])) {
     $id = $_GET['delete'];
-    $result = $database->query("DELETE FROM bed WHERE Bed_ID = '$id'") or die($database->error);
-    if ($result) {
-        // reporting
-        $_SESSION['res_msg'] = "The record of the bed (id: $id) has been deleted.";
-        $_SESSION['res_msg_type'] = "success";
-    } else {
-        $_SESSION['res_msg'] = "The record of the bed (id: $id) couldn't be deleted.";
-        $_SESSION['res_msg_type'] = "danger";
-    }
+    generateInfoMsg($database, $database->query("DELETE FROM bed WHERE Bed_ID = '$id'"),"bed", $id, "deleted");
 
     // reload the page
     header("Location: ".$_SERVER["PHP_SELF"]."?message");
@@ -36,15 +31,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $wardId = $_POST['wardId'];
         $available = $_POST['available'];
         // Execution
-        if ($sql_statement->execute()) {
-            // reporting
-            $_SESSION['res_msg'] = "The record of the bed id: ".$_POST['bedId']." has been added.";
-            $_SESSION['res_msg_type'] = "success";
-        }
-        else {
-            $_SESSION['res_msg'] = "The record couldn't be added. Error: $sql_statement->error";
-            $_SESSION['res_msg_type'] = "danger";
-        }
+        generateInfoMsg($sql_statement, $sql_statement->execute(),"bed", $_POST['bedId'], "added");
         $sql_statement->close();
 
         // reload the page
@@ -61,15 +48,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $wardId = $_POST['wardId'];
         $available = $_POST['available'];
         // Execution
-        if ($sql_statement->execute()) {
-            // reporting
-            $_SESSION['res_msg'] = "The record of the bed id: ".$_POST['bedId']." has been updated.";
-            $_SESSION['res_msg_type'] = "success";
-        }
-        else {
-            $_SESSION['res_msg'] = "The record couldn't be updated. Error: $sql_statement->error";
-            $_SESSION['res_msg_type'] = "danger";
-        }
+        generateInfoMsg($sql_statement, $sql_statement->execute(),"bed", $_POST['bedId'], "updated");
         $sql_statement->close();
 
         // reload the page
