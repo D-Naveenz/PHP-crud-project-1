@@ -8,12 +8,12 @@ require_once "core/config.php";
 
 // Connect to the database
 $database = createMySQLConn();
-$res_select = $database->query("SELECT * FROM `diagnosis`");
+$res_select = $database->query("SELECT * FROM `pcu`");
 
 // Delete Request
 if (isset($_GET['delete']) && !empty($_GET['delete'])) {
     $id = $_GET['delete'];
-    generateInfoMsg($database, $database->query("DELETE FROM diagnosis WHERE diagnosis.Diagnosis_Code = '$id';"),"diagnosis", $id, "deleted");
+    generateInfoMsg($database, $database->query("DELETE FROM pcu WHERE PCU_ID = '$id'"),"pcu", $id, "deleted");
 
     // reload the page
     header("Location: ".$_SERVER["PHP_SELF"]."?message");
@@ -23,19 +23,15 @@ if (isset($_GET['delete']) && !empty($_GET['delete'])) {
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_POST['btnAdd'])) {
         // Create request
-        $sql = "INSERT INTO diagnosis (Diagnosis_Code, Diagnosis_Name, Description, Doctor_ID, Patient_ID, Date, Time) VALUES (?,?,?,?,?,?,?)";
+        $sql = "INSERT INTO pcu (PCU_ID, `In-Charge`, Type) VALUES (?,?,?)";
         $sql_statement = $database->prepare($sql);
         // bind param with references : https://www.php.net/manual/en/language.references.whatare.php
-        $sql_statement->bind_param("sssssss", $Val1, $Val2, $Val3, $Val4, $Val5, $Val6, $Val7);
+        $sql_statement->bind_param("sss", $Val1, $Val2, $Val3);
         $Val1 = $_POST['Val1'];
         $Val2 = $_POST['Val2'];
         $Val3 = $_POST['Val3'];
-        $Val4 = $_POST['Val4'];
-        $Val5 = $_POST['Val5'];
-        $Val6 = $_POST['Val6'];
-        $Val7 = $_POST['Val7'];
         // Execution
-        generateInfoMsg($sql_statement, $sql_statement->execute(),"diagnosis", $_POST['Val1'], "added");
+        generateInfoMsg($sql_statement, $sql_statement->execute(),"pcu", $_POST['Val1'], "added");
         $sql_statement->close();
 
         // reload the page
@@ -43,20 +39,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     if (isset($_POST['btnUpdate'])) {
-        // Update request
-        $sql = "UPDATE diagnosis SET Diagnosis_Name = ?, Description = ?, Doctor_ID = ?, Patient_ID = ?, Date = ?, Time = ? WHERE diagnosis.Diagnosis_Code = ?;";
+        // Create request
+        $sql = "UPDATE ward SET Name = ?, PCU_ID = ? WHERE ward.Ward_ID = ?;";
         $sql_statement = $database->prepare($sql);
         // bind param with references : https://www.php.net/manual/en/language.references.whatare.php
-        $sql_statement->bind_param("sssssss", $Val2, $Val3, $Val4, $Val5, $Val6, $Val7, $Val1);
+        $sql_statement->bind_param("sss", $Val2, $Val3, $Val1);
         $Val1 = $_POST['Val1'];
         $Val2 = $_POST['Val2'];
         $Val3 = $_POST['Val3'];
-        $Val4 = $_POST['Val4'];
-        $Val5 = $_POST['Val5'];
-        $Val6 = $_POST['Val6'];
-        $Val7 = $_POST['Val7'];
         // Execution
-        generateInfoMsg($sql_statement, $sql_statement->execute(),"diagnosis", $_POST['Val1'], "updated");
+        generateInfoMsg($sql_statement, $sql_statement->execute(),"pcu", $_POST['Val1'], "updated");
         $sql_statement->close();
 
         // reload the page
@@ -84,10 +76,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             crossorigin="anonymous">
     </script>
 
-    <!-- Crud page Script -->
-    <script type="text/javascript" src="js/crud_page.js"></script>
+    <!-- Crud Page Script -->
+    <script type="text/javascript" src="../js/crud_page.js"></script>
 
-    <title>Diagnoses</title>
+    <title>Patient Care Units</title>
 </head>
 <body>
 <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
@@ -124,7 +116,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 <!-- Body Header -->
 <div class="container-fluid p-5 bg-primary text-white text-center">
-    <h1>List of Diagnoses</h1>
+    <h1>List of Patient Care Units</h1>
     <p>Suwa Sahana Hospital</p>
 </div>
 <!-- Body Header -->
@@ -133,23 +125,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <div class="container">
         <div class="row justify-content-center">
             <table class="table table-hover">
-                <col style="width: 12%;" />
-                <col style="width: 12%;" />
-                <col style="width: 12%;" />
-                <col style="width: 12%;" />
-                <col style="width: 12%;" />
-                <col style="width: 12%;" />
-                <col style="width: 12%;" />
-                <col style="width: 16%;" />
+                <col style="width: 27%;" />
+                <col style="width: 27%;" />
+                <col style="width: 27%;" />
+                <col style="width: 19%;" />
                 <thead style="background-color: blue; color: white">
                 <tr>
-                    <th scope="col">Code</th>
-                    <th scope="col">Name</th>
-                    <th scope="col">Description</th>
-                    <th scope="col">Doctor ID</th>
-                    <th scope="col">Patient ID</th>
-                    <th scope="col">Date</th>
-                    <th scope="col">Time</th>
+                    <th scope="col">PCU ID</th>
+                    <th scope="col">In-Charge</th>
+                    <th scope="col">Type</th>
                     <th scope="col">Actions</th>
                 </tr>
                 </thead>
@@ -157,55 +141,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $row_count = 0;
                 while ($row = $res_select->fetch_assoc()): ?>
                     <tr id="row-<?=$row_count?>">
-                        <td><?=$row['Diagnosis_Code']?></td>
-                        <td><?=$row['Diagnosis_Name']?></td>
-                        <td><?=$row['Description']?></td>
-                        <td><?=$row['Doctor_ID']?></td>
-                        <td><?=$row['Patient_ID']?></td>
-                        <td><?=$row['Date']?></td>
-                        <td><?=$row['Time']?></td>
+                        <td><?=$row['PCU_ID']?></td>
+                        <td><?=$row['In-Charge']?></td>
+                        <td><?=$row['Type']?></td>
                         <td>
                             <a href="#row-edit-<?=$row_count?>" class="btn btn-info data-row-toggle">Edit</a>
-                            <!-- Array format a:3:{i:0;s:5:"val1";i:1;s:5:"val2";i:2;s:10:"val3";} -->
-                            <a href='<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>?delete=<?=$row['Diagnosis_Code']?>' class="btn btn-danger">Delete</a>
+                            <a href="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>?delete=<?=$row['PCU_ID']?>" class="btn btn-danger">Delete</a>
                         </td>
                     </tr>
                     <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
                         <tr id="row-edit-<?=$row_count?>" class="update-row">
                             <td>
-                                <?=$row['Diagnosis_Code']?>
+                                <?=$row['PCU_ID']?>
                                 <label>
-                                    <input type="hidden" class="form-control" name="Val1" value="<?=$row['Diagnosis_Code']?>">
+                                    <input type="hidden" class="form-control" name="Val1" value="<?=$row['PCU_ID']?>">
                                 </label>
                             </td>
                             <td>
                                 <label>
-                                    <input type="text" class="form-control" name="Val2" value="<?=$row['Diagnosis_Name']?>">
+                                    <input type="text" class="form-control" name="Val2" value="<?=$row['In-Charge']?>">
                                 </label>
                             </td>
                             <td>
                                 <label>
-                                    <input type="text" class="form-control" name="Val3" value="<?=$row['Description']?>">
-                                </label>
-                            </td>
-                            <td>
-                                <label>
-                                    <input type="text" class="form-control" name="Val4" value="<?=$row['Doctor_ID']?>">
-                                </label>
-                            </td>
-                            <td>
-                                <label>
-                                    <input type="text" class="form-control" name="Val5" value="<?=$row['Patient_ID']?>">
-                                </label>
-                            </td>
-                            <td>
-                                <label>
-                                    <input type="date" class="form-control" name="Val6" value="<?=$row['Date']?>">
-                                </label>
-                            </td>
-                            <td>
-                                <label>
-                                    <input type="time" class="form-control" name="Val7" value="<?=$row['Time']?>">
+                                    <input type="text" class="form-control" name="Val3" value="<?=$row['Type']?>">
                                 </label>
                             </td>
                             <td>
@@ -229,27 +188,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         </td>
                         <td>
                             <label>
-                                <input type="text" class="form-control" name="Val3">
-                            </label>
-                        </td>
-                        <td>
-                            <label>
-                                <input type="text" class="form-control" name="Val4">
-                            </label>
-                        </td>
-                        <td>
-                            <label>
-                                <input type="text" class="form-control" name="Val5">
-                            </label>
-                        </td>
-                        <td>
-                            <label>
-                                <input type="date" class="form-control" name="Val6">
-                            </label>
-                        </td>
-                        <td>
-                            <label>
-                                <input type="time" class="form-control" name="Val7">
+                                <input type="text" class="form-control" name="Val3"">
                             </label>
                         </td>
                         <td>
@@ -268,4 +207,3 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </div>
 </body>
 </html>
-

@@ -14,10 +14,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $userid = $_POST['userid'];
         $pass = $_POST['password'];
 
+        //header("Location: ./patient/edit.php?update=PT0003");
         //header("Location: ./patient/edit.php");
         //header("Location: ./patient/view.php?id=PT0001");
-        //header("Location: ./beds.php");
-        header("Location: ./diags.php");
+        header("Location: ./beds.php");
+        //header("Location: ./diags.php");
     }
 }
 ?>

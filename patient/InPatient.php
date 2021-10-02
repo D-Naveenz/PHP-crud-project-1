@@ -1,7 +1,7 @@
 <?php
-require_once "config.php";
+require_once "core/config.php";
 
-class InPatient extends Patient
+final class InPatient extends Patient
 {
     // private variables
     public string $dob;
@@ -123,7 +123,7 @@ class InPatient extends Patient
     {
         $database = createMySQLConn();
         if (parent::insertToDb()) {
-            $sql = "INSERT INTO `in_patient` (`Patient_ID`, `DOB`, `Admitted_Date`, `Admitted_Time`, `Discharge_Date`, `Discharge_Time`, `PC_Doctor`, `Bed_ID`) VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
+            $sql = "INSERT INTO `in_patient` (`Patient_ID`, `DOB`, `Admitted_Date`, `Admitted_Time`, `Discharge_Date`, `Discharge_Time`, `PC_Doctor`, `Bed_ID`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
             $sql_statement = $database->prepare($sql);
             // bind param with references : https://www.php.net/manual/en/language.references.whatare.php
             $sql_statement->bind_param("ssssssss", $this->patient_id, $this->dob, $this->add_date, $this->add_time, $this->dis_date, $this->dis_time, $this->pc_doc, $this->bed_id);
@@ -140,7 +140,7 @@ class InPatient extends Patient
     {
         $database = createMySQLConn();
         if (parent::updateRow()) {
-            $sql = "UPDATE `in_patient` SET `DOB` = ?, `Admitted_Date` = ?, `Admitted_Time` = ?, `Discharge_Date` = ?, `Discharge_Time` = ?, `PC_Doctor` = ?, `Bed_ID` = ? WHERE `in_patient`.`Patient_ID` = ? AND `in_patient`.`Admitted_Date` = ? AND `in_patient`.`Admitted_Time` = ?;";
+            $sql = "UPDATE `in_patient` SET `DOB` = ?, `Admitted_Date` = ?, `Admitted_Time` = ?, `Discharge_Date` = ?, `Discharge_Time` = ?, `PC_Doctor` = ?, `Bed_ID` = ? WHERE `in_patient`.`Patient_ID` = ? AND `in_patient`.`Admitted_Date` = ? AND `in_patient`.`Admitted_Time` = ?";
             $sql_statement = $database->prepare($sql);
             // bind param with references : https://www.php.net/manual/en/language.references.whatare.php
             $sql_statement->bind_param("ssssssssss", $this->dob, $this->add_date, $this->add_time, $this->dis_date, $this->dis_time, $this->pc_doc, $this->bed_id, $this->patient_id,

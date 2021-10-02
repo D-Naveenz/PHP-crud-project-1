@@ -8,12 +8,12 @@ require_once "core/config.php";
 
 // Connect to the database
 $database = createMySQLConn();
-$res_select = $database->query("SELECT * FROM `pcu`");
+$res_select = $database->query("SELECT * FROM `diagnosticunit`");
 
 // Delete Request
 if (isset($_GET['delete']) && !empty($_GET['delete'])) {
     $id = $_GET['delete'];
-    generateInfoMsg($database, $database->query("DELETE FROM pcu WHERE PCU_ID = '$id'"),"pcu", $id, "deleted");
+    generateInfoMsg($database, $database->query("DELETE FROM diagnosticunit WHERE Unit_ID = '$id'"),"diagnostic unit", $id, "deleted");
 
     // reload the page
     header("Location: ".$_SERVER["PHP_SELF"]."?message");
@@ -23,7 +23,7 @@ if (isset($_GET['delete']) && !empty($_GET['delete'])) {
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_POST['btnAdd'])) {
         // Create request
-        $sql = "INSERT INTO pcu (PCU_ID, `In-Charge`, Type) VALUES (?,?,?)";
+        $sql = "INSERT INTO diagnosticunit (Unit_ID, Name, PCU_ID) VALUES (?,?,?)";
         $sql_statement = $database->prepare($sql);
         // bind param with references : https://www.php.net/manual/en/language.references.whatare.php
         $sql_statement->bind_param("sss", $Val1, $Val2, $Val3);
@@ -31,7 +31,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $Val2 = $_POST['Val2'];
         $Val3 = $_POST['Val3'];
         // Execution
-        generateInfoMsg($sql_statement, $sql_statement->execute(),"pcu", $_POST['Val1'], "added");
+        generateInfoMsg($sql_statement, $sql_statement->execute(),"diagnostic unit", $_POST['Val1'], "added");
         $sql_statement->close();
 
         // reload the page
@@ -40,7 +40,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if (isset($_POST['btnUpdate'])) {
         // Create request
-        $sql = "UPDATE ward SET Name = ?, PCU_ID = ? WHERE ward.Ward_ID = ?;";
+        $sql = "UPDATE diagnosticunit SET Name = ?, PCU_ID = ? WHERE diagnosticunit.Unit_ID = ?;";
         $sql_statement = $database->prepare($sql);
         // bind param with references : https://www.php.net/manual/en/language.references.whatare.php
         $sql_statement->bind_param("sss", $Val2, $Val3, $Val1);
@@ -48,7 +48,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $Val2 = $_POST['Val2'];
         $Val3 = $_POST['Val3'];
         // Execution
-        generateInfoMsg($sql_statement, $sql_statement->execute(),"pcu", $_POST['Val1'], "updated");
+        generateInfoMsg($sql_statement, $sql_statement->execute(),"diagnostic unit", $_POST['Val1'], "updated");
         $sql_statement->close();
 
         // reload the page
@@ -77,9 +77,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </script>
 
     <!-- Crud Page Script -->
-    <script type="text/javascript" src="js/crud_page.js"></script>
+    <script type="text/javascript" src="../js/crud_page.js"></script>
 
-    <title>Patient Care Units</title>
+    <title>Diagnostic Units</title>
 </head>
 <body>
 <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
@@ -116,7 +116,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 <!-- Body Header -->
 <div class="container-fluid p-5 bg-primary text-white text-center">
-    <h1>List of Patient Care Units</h1>
+    <h1>List of Diagnostic Units</h1>
     <p>Suwa Sahana Hospital</p>
 </div>
 <!-- Body Header -->
@@ -131,9 +131,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <col style="width: 19%;" />
                 <thead style="background-color: blue; color: white">
                 <tr>
+                    <th scope="col">Unit ID</th>
+                    <th scope="col">Name</th>
                     <th scope="col">PCU ID</th>
-                    <th scope="col">In-Charge</th>
-                    <th scope="col">Type</th>
                     <th scope="col">Actions</th>
                 </tr>
                 </thead>
@@ -141,30 +141,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $row_count = 0;
                 while ($row = $res_select->fetch_assoc()): ?>
                     <tr id="row-<?=$row_count?>">
+                        <td><?=$row['Unit_ID']?></td>
+                        <td><?=$row['Name']?></td>
                         <td><?=$row['PCU_ID']?></td>
-                        <td><?=$row['In-Charge']?></td>
-                        <td><?=$row['Type']?></td>
                         <td>
                             <a href="#row-edit-<?=$row_count?>" class="btn btn-info data-row-toggle">Edit</a>
-                            <a href="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>?delete=<?=$row['PCU_ID']?>" class="btn btn-danger">Delete</a>
+                            <a href="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>?delete=<?=$row['Unit_ID']?>" class="btn btn-danger">Delete</a>
                         </td>
                     </tr>
                     <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
                         <tr id="row-edit-<?=$row_count?>" class="update-row">
                             <td>
-                                <?=$row['PCU_ID']?>
+                                <?=$row['Unit_ID']?>
                                 <label>
-                                    <input type="hidden" class="form-control" name="Val1" value="<?=$row['PCU_ID']?>">
+                                    <input type="hidden" class="form-control" name="Val1" value="<?=$row['Unit_ID']?>">
                                 </label>
                             </td>
                             <td>
                                 <label>
-                                    <input type="text" class="form-control" name="Val2" value="<?=$row['In-Charge']?>">
+                                    <input type="text" class="form-control" name="Val2" value="<?=$row['Name']?>">
                                 </label>
                             </td>
                             <td>
                                 <label>
-                                    <input type="text" class="form-control" name="Val3" value="<?=$row['Type']?>">
+                                    <input type="text" class="form-control" name="Val3" value="<?=$row['PCU_ID']?>">
                                 </label>
                             </td>
                             <td>
@@ -188,7 +188,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         </td>
                         <td>
                             <label>
-                                <input type="text" class="form-control" name="Val3"">
+                                <input type="text" class="form-control" name="Val3">
                             </label>
                         </td>
                         <td>

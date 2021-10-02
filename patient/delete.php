@@ -1,7 +1,7 @@
 <?php
-require_once "../core/Patient.php";
-require_once "../core/InPatient.php";
-require_once "../core/OutPatient.php";
+require_once "Patient.php";
+require_once "InPatient.php";
+require_once "OutPatient.php";
 
 // store session data with checking get requests
 if (isset($_GET['id']) && !empty($_GET['id'])) {

@@ -1,15 +1,23 @@
 <?php
-require_once "../core/Patient.php";
-require_once "../core/InPatient.php";
-require_once "../core/OutPatient.php";
+require_once "Patient.php";
+require_once "InPatient.php";
+require_once "OutPatient.php";
 
-// check whether patient is logged in to server
-if (!$_SESSION['patient']->isExistsInDb()) {
+function createPatient() {
     // Check whether patient id is in the address
     if (isset($_GET['id']) && !empty($_GET['id'])) {
         // form is preparing to update the patient record
         $_SESSION['patient'] = new Patient($_GET['id']);
     }
+}
+
+// check whether patient is logged in to server
+if (isset($_SESSION['patient'])) {
+    if (!$_SESSION['patient']->isExistsInDb()) {
+        createPatient();
+    }
+} else {
+    createPatient();
 }
 
 if ($_SESSION['patient']->isInPatient()) {
@@ -47,25 +55,24 @@ if ($_SESSION['patient']->isInPatient()) {
 </div>
 
 <div class="container-fluid" style="margin-top: 20px;" id="nav-patient">
-    <!-- Tabs navs -->
-    <ul class="nav nav-tabs nav-justified mb-3" id="pt-navbar" role="tablist">
-        <li class="nav-item" role="presentation" id="nav-itm-1">
-            <a class="nav-link active" id="pt-tab-1" data-bs-toggle="tab" href="#pt-tab-panel-1" role="tab"
-               aria-controls="pt-tab-panel-1" aria-selected="true">Basic Information</a>
-        </li>
-        <?php if ($_SESSION['patient'] instanceof InPatient): ?>
+    <?php if ($_SESSION['patient'] instanceof OutPatient): ?>
+        <!-- Tabs navs -->
+        <ul class="nav nav-tabs nav-justified mb-3" id="pt-navbar" role="tablist">
+            <li class="nav-item" role="presentation" id="nav-itm-1">
+                <a class="nav-link active" id="pt-tab-1" data-bs-toggle="tab" href="#pt-tab-panel-1" role="tab"
+                   aria-controls="pt-tab-panel-1" aria-selected="true">Information</a>
+            </li>
             <li class="nav-item" role="presentation" id="nav-itm-2">
                 <a class="nav-link id=" id="pt-tab-2" data-bs-toggle="tab" href="#pt-tab-panel-2" role="tab"
                    aria-controls="pt-tab-panel-2" aria-selected="false">In-patient status</a>
             </li>
-        <?php else: ?>
             <li class="nav-item" role="presentation" id="nav-itm-3">
                 <a class="nav-link id=" id="pt-tab-3" data-bs-toggle="tab" href="#pt-tab-panel-3" role="tab"
                    aria-controls="pt-tab-panel-3" aria-selected="false">Out-patient status</a>
             </li>
-        <?php endif; ?>
-    </ul>
-    <!-- Tabs navs -->
+        </ul>
+        <!-- Tabs navs -->
+    <?php endif; ?>
 
     <!-- Tabs content -->
     <div class="tab-content container" id="nav-patient-content">
@@ -73,10 +80,10 @@ if ($_SESSION['patient']->isInPatient()) {
         <!-- 1st content: Patient relation -->
         <div class="container tab-pane active" id="pt-tab-panel-1" role="tabpanel" aria-labelledby="pt-tab-panel-1">
             <div class="mb-3">
-                <h2>Patient basic information</h2>
+                <h2>Patient information</h2>
             </div>
             <div class="row justify-content-center mb-3">
-                <table class="table">
+                <table class="table table-hover">
                     <tr>
                         <td>Patient ID</td>
                         <td><?php echo $_SESSION['patient']->getPatientId(); ?></td>
@@ -89,6 +96,49 @@ if ($_SESSION['patient']->isInPatient()) {
                         <td>Patient Type</td>
                         <td><?php echo $_SESSION['patient']->getType(); ?></td>
                     </tr>
+                    <?php if ($_SESSION['patient'] instanceof InPatient): ?>
+                        <!-- In-patient relation -->
+                        <tr>
+                            <td>Date of Birth</td>
+                            <td><?php echo $_SESSION['patient']->dob; ?></td>
+                        </tr>
+                        <tr>
+                            <td>Admitted Date</td>
+                            <td><?php echo $_SESSION['patient']->getAddDate(); ?></td>
+                        </tr>
+                        <tr>
+                            <td>Admitted Time</td>
+                            <td><?php echo $_SESSION['patient']->getAddTime(); ?></td>
+                        </tr>
+                        <tr>
+                            <td>Discharge Date</td>
+                            <td><?php echo $_SESSION['patient']->getDisDate(); ?></td>
+                        </tr>
+                        <tr>
+                            <td>Discharge Time</td>
+                            <td><?php echo $_SESSION['patient']->getDisTime(); ?></td>
+                        </tr>
+                        <tr>
+                            <td>Primary Care Doctor</td>
+                            <td><?php echo $_SESSION['patient']->pc_doc; ?></td>
+                        </tr>
+                        <tr>
+                            <td>Bed ID</td>
+                            <td><?php echo $_SESSION['patient']->bed_id; ?></td>
+                        </tr>
+                        <!-- In-patient Relation -->
+                    <?php elseif ($_SESSION['patient'] instanceof OutPatient): ?>
+                        <!-- Out-patient relation -->
+                        <tr>
+                            <td>Arrived Date</td>
+                            <td><?php echo $_SESSION['patient']->getArrDate(); ?></td>
+                        </tr>
+                        <tr>
+                            <td>Arrived Time</td>
+                            <td><?php echo $_SESSION['patient']->getArrTime(); ?></td>
+                        </tr>
+                        <!-- Out-patient relation -->
+                    <?php endif; ?>
                 </table>
             </div>
         </div>

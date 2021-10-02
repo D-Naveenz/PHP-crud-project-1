@@ -79,7 +79,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </script>
 
     <!-- Crud page Script -->
-    <script type="text/javascript" src="js/crud_page.js"></script>
+    <script type="text/javascript" src="../js/crud_page.js"></script>
 
     <title>Tests</title>
 </head>
