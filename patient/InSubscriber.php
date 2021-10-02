@@ -5,7 +5,7 @@ use JetBrains\PhpStorm\Pure;
 
 class InSubscriber extends PatientRealation
 {
-    #[Pure] private function __construct($id, $fname, $lname, $relation, $address, $contact)
+    #[Pure] function __construct($id, $fname, $lname, $relation, $address, $contact)
     {
         parent::__construct($id, $fname, $lname, $relation, $address, $contact);
         $this->table = "insurance_sub";

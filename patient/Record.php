@@ -14,7 +14,7 @@ class Record
     public int $temperature;
     private ?array $symptoms;
 
-    private function __construct($pId, $nId, $date, $time, $weight, $pressure, $pulse, $temperature)
+    function __construct($pId, $nId, $date, $time, $weight, $pressure, $pulse, $temperature)
     {
         $this->patient_id = $pId;
         $this->nurse_id = $nId;
@@ -28,11 +28,15 @@ class Record
     }
 
     /**
-     * @return array
+     * @return string
      */
-    public function getSymptoms(): array
+    public function getSymptoms(): string
     {
-        return $this->symptoms;
+        $result = "";
+        foreach ($this->symptoms as $symp) {
+            $result = $result.", ".$symp;
+        }
+        return $result;
     }
 
     /**

@@ -3,15 +3,15 @@ require_once "../core/config.php";
 
 class Insurance
 {
-    public string $patient_id;
+    private string $patient_id;
     public string $company;
     public string $branch;
     public string $address;
     public int $contact;
 
-    function __construct()
+    function __construct($id)
     {
-        $this->patient_id = "";
+        $this->patient_id = $id;
         $this->company = "";
         $this->branch = "";
         $this->address = "";
@@ -23,8 +23,7 @@ class Insurance
         $result = $database->query("SELECT * FROM `patient_insurance` WHERE `Patient_ID` = '$id'");
         if ($result->num_rows == 1) {
             $row = $result->fetch_assoc();
-            $target = new Insurance();
-            $target->patient_id = $row['Patient_ID'];
+            $target = new Insurance($row['Patient_ID']);
             $target->company = $row['Company_Name'];
             $target->branch = $row['Branch_Name'];
             $target->address = $row['Address'];

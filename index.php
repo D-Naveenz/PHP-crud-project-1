@@ -15,8 +15,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $pass = $_POST['password'];
 
         //header("Location: ./patient/edit.php?update=PT0003");
-        //header("Location: ./patient/edit.php");
-        header("Location: ./patient/view.php?id=PT0001");
+        header("Location: ./patient/edit.php");
+        //header("Location: ./patient/view.php?id=PT0001");
         //header("Location: pages/beds.php");
         //header("Location: ./diags.php");
     }
