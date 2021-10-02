@@ -1,11 +1,8 @@
 <?php
-require_once "core/config.php";
+require_once "../core/config.php";
 
 class PatientRealation
 {
-    const TBL_EMERGENCY = "emergency_contact";
-    const TBL_INSUBCRIBER = "insurance_sub";
-
     public string $patient_id;
     public string $fname;
     public string $lname;
@@ -13,7 +10,9 @@ class PatientRealation
     public string $address;
     public int $contact;
 
-    private function __construct()
+    protected string $table;
+
+    protected function __construct()
     {
         $this->patient_id = "";
         $this->fname = "";
@@ -21,9 +20,11 @@ class PatientRealation
         $this->relation = "";
         $this->address = "";
         $this->contact = "";
+        $this->table = "";
     }
 
-    private static function Build($table ,$id, $fname, $relation) {
+    public function Build($id, $fname, $relation) {
+        $table = $this->table;
         $database = createMySQLConn();
         $result = $database->query("SELECT * FROM $table WHERE `Patient_ID` = '$id' AND `FName` = $fname AND `LName` = $relation");
         if ($result->num_rows == 1) {
@@ -44,8 +45,8 @@ class PatientRealation
         return null;
     }
 
-    public function insertToDb($table)
-    {
+    public function insertToDb()
+    {   $table = $this->table;
         $database = createMySQLConn();
         $sql = "INSERT INTO $table (Patient_ID, FName, LName, Relationship, Address, ContactNo) VALUES (?, ?, ?, ?, ?, ?)";
         $sql_statement = $database->prepare($sql);
@@ -56,8 +57,8 @@ class PatientRealation
         $sql_statement->close();
     }
 
-    public function updateRow($table)
-    {
+    public function updateRow()
+    {   $table = $this->table;
         $database = createMySQLConn();
         $sql = "UPDATE $table SET LName = ?, Address = ?, ContactNo = ? WHERE $table.Patient_ID = ? AND $table.FName = ? AND $table.Relationship = ?";
         $sql_statement = $database->prepare($sql);
@@ -68,8 +69,8 @@ class PatientRealation
         $sql_statement->close();
     }
 
-    public function deleteRow($table): bool
-    {
+    public function deleteRow()
+    {   $table = $this->table;
         $database = createMySQLConn();
         $sql = "DELETE FROM $table WHERE $table.Patient_ID = ? AND $table.FName = ? AND $table.Relationship = ?";
         $sql_statement = $database->prepare($sql);
@@ -78,6 +79,5 @@ class PatientRealation
         // Execution
         $sql_statement->execute();
         $sql_statement->close();
-        return false;
     }
 }

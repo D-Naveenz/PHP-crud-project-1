@@ -4,7 +4,7 @@
  * Developed by Naveen Dharmathunga
  * GitHub: https://github.com/D-Naveenz
  */
-require_once "core/config.php";
+require_once "../core/config.php";
 
 // Connect to the database
 $database = createMySQLConn();

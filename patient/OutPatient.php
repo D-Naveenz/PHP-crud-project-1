@@ -1,5 +1,5 @@
 <?php
-require_once "core/config.php";
+require_once "../core/config.php";
 
 final class OutPatient extends Patient
 {
