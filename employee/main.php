@@ -33,9 +33,10 @@ $_SESSION['previous_page'] = getAbsUrl();
     <p>Suwa Sahana Hospital</p>
 </div>
 <div class="container-fluid">
-    <div class="container">
+    <div class="container" style="margin-top: 20px">
         <div class="row justify-content-center">
             <a href="../patient/list.php">Patients List</a>
+            <a href="../employee/list.php">Employee List</a>
             <a href="../pages/beds.php">Beds</a>
             <a href="../pages/diags.php">Diagrams</a>
             <a href="../pages/diagunits.php">Diagnosis Units</a>

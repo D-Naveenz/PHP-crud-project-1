@@ -10,13 +10,17 @@ $role = $userid = $pass = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_POST['btnLogin'])) {
-        $role = $_POST['role'];
+        $role = $_POST['type'];
         $userid = $_POST['userid'];
-        $pass = $_POST['password'];
 
-        $_SESSION['patient_id'] = $_POST['userid'];
-        //header("Location: patient/list.php");
-        header("Location: employee/main.php");
+        if ($role == "1") {
+            $_SESSION['patient_id'] = $_POST['userid'];
+            header("Location: patient/view.php");
+        } else {
+            $_SESSION['employee_id'] = $_POST['userid'];
+            $pass = $_POST['password'];
+            header("Location: employee/main.php");
+        }
     }
 }
 ?>
@@ -154,12 +158,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $(document).ready(() => {
             $('#btnPatient').click(() => {
                 role = "Patient";
+                $("#role").val("1");
                 $('.avatar img').attr('src', './res/guest.png');
                 changeModal();
             });
 
             $('#btnStaff').click(() => {
                 role = "Staff";
+                $("#role").val("0");
                 $('.avatar img').attr('src', './res/staff.png');
                 changeModal();
             });
@@ -216,6 +222,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
             <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
                 <div class="modal-body">
+                    <input type="hidden" class="form-control" name="type" id="role" required />
                     <div class="p-0">
                         <label for="txtLogin"></label>
                         <input type="text" class="form-control" name="userid" placeholder="?Staff? ID" id="txtLogin" required />

@@ -6,10 +6,9 @@ require_once "Record.php";
 
 final class InPatient extends Patient
 {
-    // private variables
-    public string $dob;
 
     // public variables
+    public string $dob;
     public string $pc_doc;
     public string $bed_id;
     public ?Insurance $insurance;
