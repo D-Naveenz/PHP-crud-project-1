@@ -1,7 +1,7 @@
 <?php
-require_once "config.php";
+require_once "../core/config.php";
 
-class OutPatient extends Patient
+final class OutPatient extends Patient
 {
 // private variables
 

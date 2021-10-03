@@ -1,14 +1,19 @@
 <?php
-require_once "config.php";
+require_once "../core/config.php";
+require_once "Insurance.php";
+require_once "Emergency.php";
+require_once "Record.php";
 
-class InPatient extends Patient
+final class InPatient extends Patient
 {
-    // private variables
-    public string $dob;
 
     // public variables
+    public string $dob;
     public string $pc_doc;
     public string $bed_id;
+    public ?Insurance $insurance;
+    public ?array $emergency;
+    public ?array $records;
 
     // private variables
     private ?string $add_date;
@@ -29,6 +34,9 @@ class InPatient extends Patient
             $this->dis_time = $result['Discharge_Time'];
             $this->pc_doc = $result['PC_Doctor'];
             $this->bed_id = $result['Bed_ID'];
+            $this->insurance = Insurance::Build($pid);
+            $this->emergency = Emergency::findAll($pid);
+            $this->records = Record::findAll($pid);
         }
         else {
             $this->dob = "";
@@ -38,6 +46,7 @@ class InPatient extends Patient
             $this->dis_time = null;
             $this->pc_doc = "";
             $this->bed_id = "";
+            $this->insurance = new Insurance($pid);
         }
     }
 
@@ -123,7 +132,7 @@ class InPatient extends Patient
     {
         $database = createMySQLConn();
         if (parent::insertToDb()) {
-            $sql = "INSERT INTO `in_patient` (`Patient_ID`, `DOB`, `Admitted_Date`, `Admitted_Time`, `Discharge_Date`, `Discharge_Time`, `PC_Doctor`, `Bed_ID`) VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
+            $sql = "INSERT INTO `in_patient` (`Patient_ID`, `DOB`, `Admitted_Date`, `Admitted_Time`, `Discharge_Date`, `Discharge_Time`, `PC_Doctor`, `Bed_ID`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
             $sql_statement = $database->prepare($sql);
             // bind param with references : https://www.php.net/manual/en/language.references.whatare.php
             $sql_statement->bind_param("ssssssss", $this->patient_id, $this->dob, $this->add_date, $this->add_time, $this->dis_date, $this->dis_time, $this->pc_doc, $this->bed_id);
@@ -140,7 +149,7 @@ class InPatient extends Patient
     {
         $database = createMySQLConn();
         if (parent::updateRow()) {
-            $sql = "UPDATE `in_patient` SET `DOB` = ?, `Admitted_Date` = ?, `Admitted_Time` = ?, `Discharge_Date` = ?, `Discharge_Time` = ?, `PC_Doctor` = ?, `Bed_ID` = ? WHERE `in_patient`.`Patient_ID` = ? AND `in_patient`.`Admitted_Date` = ? AND `in_patient`.`Admitted_Time` = ?;";
+            $sql = "UPDATE `in_patient` SET `DOB` = ?, `Admitted_Date` = ?, `Admitted_Time` = ?, `Discharge_Date` = ?, `Discharge_Time` = ?, `PC_Doctor` = ?, `Bed_ID` = ? WHERE `in_patient`.`Patient_ID` = ? AND `in_patient`.`Admitted_Date` = ? AND `in_patient`.`Admitted_Time` = ?";
             $sql_statement = $database->prepare($sql);
             // bind param with references : https://www.php.net/manual/en/language.references.whatare.php
             $sql_statement->bind_param("ssssssssss", $this->dob, $this->add_date, $this->add_time, $this->dis_date, $this->dis_time, $this->pc_doc, $this->bed_id, $this->patient_id,
@@ -175,6 +184,18 @@ class InPatient extends Patient
 
     public static function getFreeBeds(): array
     {
-        return AvailableBeds();
+        $database = createMySQLConn();
+        $available_beds = array();
+        $sql = "SELECT `Bed_ID` FROM `bed` WHERE `Availability` = 1";
+        $result = $database->query($sql);
+
+        if ($result->num_rows > 0) {
+            // output data of each row
+            $count = 0;
+            while ($row = $result->fetch_assoc()) {
+                $available_beds[$count++] = $row["Bed_ID"];
+            }
+        }
+        return $available_beds;
     }
 }

@@ -1,24 +1,19 @@
 <?php
-require_once "core/config.php";
+/*
+ * PHP CRUD Template v1.0
+ * Developed by Naveen Dharmathunga
+ * GitHub: https://github.com/D-Naveenz
+ */
+require_once "../core/config.php";
 
-// start the session
-session_start();
-
+// Connect to the database
 $database = createMySQLConn();
-$res_select = $database->query("SELECT * FROM `bed`");
+$res_select = $database->query("SELECT * FROM `treatment`");
 
 // Delete Request
 if (isset($_GET['delete']) && !empty($_GET['delete'])) {
-    $id = $_GET['delete'];
-    $result = $database->query("DELETE FROM bed WHERE Bed_ID = '$id'") or die($database->error);
-    if ($result) {
-        // reporting
-        $_SESSION['res_msg'] = "The record of the bed (id: $id) has been deleted.";
-        $_SESSION['res_msg_type'] = "success";
-    } else {
-        $_SESSION['res_msg'] = "The record of the bed (id: $id) couldn't be deleted.";
-        $_SESSION['res_msg_type'] = "danger";
-    }
+    $Val1 = $_GET['delete'];
+    generateInfoMsg($database, $database->query("DELETE FROM treatment WHERE Treatment_Code = '$Val1'"),"treatment", $Val1, "deleted");
 
     // reload the page
     header("Location: ".$_SERVER["PHP_SELF"]."?message");
@@ -28,23 +23,16 @@ if (isset($_GET['delete']) && !empty($_GET['delete'])) {
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_POST['btnAdd'])) {
         // Create request
-        $sql = "INSERT INTO bed (Bed_ID, Ward_ID, Availability) VALUES (?,?,?)";
+        $sql = "INSERT INTO treatment (Treatment_Code, Type, Date, Time) VALUES (?,?,?,?)";
         $sql_statement = $database->prepare($sql);
         // bind param with references : https://www.php.net/manual/en/language.references.whatare.php
-        $sql_statement->bind_param("sss", $bedId, $wardId, $available);
-        $bedId = $_POST['bedId'];
-        $wardId = $_POST['wardId'];
-        $available = $_POST['available'];
+        $sql_statement->bind_param("ssss", $Val1, $Val2, $Val3, $Val4);
+        $Val1 = $_POST['Val1'];
+        $Val2 = $_POST['Val2'];
+        $Val3 = $_POST['Val3'];
+        $Val4 = $_POST['Val4'];
         // Execution
-        if ($sql_statement->execute()) {
-            // reporting
-            $_SESSION['res_msg'] = "The record of the bed id: ".$_POST['bedId']." has been added.";
-            $_SESSION['res_msg_type'] = "success";
-        }
-        else {
-            $_SESSION['res_msg'] = "The record couldn't be added. Error: $sql_statement->error";
-            $_SESSION['res_msg_type'] = "danger";
-        }
+        generateInfoMsg($sql_statement, $sql_statement->execute(),"treatment", $_POST['Val1'], "added");
         $sql_statement->close();
 
         // reload the page
@@ -52,24 +40,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     if (isset($_POST['btnUpdate'])) {
-        // Create request
-        $sql = "UPDATE bed SET Ward_ID = ?, Availability = ? WHERE bed.Bed_ID = ?;";
+        // Update request
+        $sql = "UPDATE treatment SET Type = ?, Date = ?, Time = ? WHERE treatment.Treatment_Code = ?;";
         $sql_statement = $database->prepare($sql);
         // bind param with references : https://www.php.net/manual/en/language.references.whatare.php
-        $sql_statement->bind_param("sis", $wardId, $available, $bedId);
-        $bedId = $_POST['bedId'];
-        $wardId = $_POST['wardId'];
-        $available = $_POST['available'];
+        $sql_statement->bind_param("ssss", $Val2, $Val3, $Val4, $Val1);
+        $Val1 = $_POST['Val1'];
+        $Val2 = $_POST['Val2'];
+        $Val3 = $_POST['Val3'];
+        $Val4 = $_POST['Val4'];
         // Execution
-        if ($sql_statement->execute()) {
-            // reporting
-            $_SESSION['res_msg'] = "The record of the bed id: ".$_POST['bedId']." has been updated.";
-            $_SESSION['res_msg_type'] = "success";
-        }
-        else {
-            $_SESSION['res_msg'] = "The record couldn't be updated. Error: $sql_statement->error";
-            $_SESSION['res_msg_type'] = "danger";
-        }
+        generateInfoMsg($sql_statement, $sql_statement->execute(),"treatment", $_POST['Val1'], "updated");
         $sql_statement->close();
 
         // reload the page
@@ -97,10 +78,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             crossorigin="anonymous">
     </script>
 
-    <!-- Crud Page Script -->
-    <script type="text/javascript" src="js/crud_page.js"></script>
+    <!-- Crud page Script -->
+    <script type="text/javascript" src="../js/crud_page.js"></script>
 
-    <title>Beds Details</title>
+    <title>Treatments</title>
 </head>
 <body>
 <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
@@ -137,7 +118,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 <!-- Body Header -->
 <div class="container-fluid p-5 bg-primary text-white text-center">
-    <h1>List of Beds</h1>
+    <h1>List of Treatments</h1>
     <p>Suwa Sahana Hospital</p>
 </div>
 <!-- Body Header -->
@@ -146,51 +127,55 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <div class="container">
         <div class="row justify-content-center">
             <table class="table table-hover">
-                <col style="width: 27%;" />
-                <col style="width: 27%;" />
-                <col style="width: 27%;" />
-                <col style="width: 19%;" />
+                <col style="width: 16%;" />
+                <col style="width: 16%;" />
+                <col style="width: 16%;" />
+                <col style="width: 16%;" />
+                <col style="width: 16%;" />
                 <thead style="background-color: blue; color: white">
                 <tr>
-                    <th scope="col">Bed ID</th>
-                    <th scope="col">Ward ID</th>
-                    <th scope="col">Availability</th>
+                    <th scope="col">Treatment Code</th>
+                    <th scope="col">Type</th>
+                    <th scope="col">Date</th>
+                    <th scope="col">Time</th>
                     <th scope="col">Actions</th>
                 </tr>
                 </thead>
                 <?php
                 $row_count = 0;
                 while ($row = $res_select->fetch_assoc()): ?>
-                    <tr id="row-<?=$row_count?>" class="<?=$row['Availability']?: 'table-danger'?>">
-                        <td><?=$row['Bed_ID']?></td>
-                        <td><?=$row['Ward_ID']?></td>
-                        <td><?=$row['Availability']? 'Available': 'Not Available'?></td>
+                    <tr id="row-<?=$row_count?>">
+                        <td><?=$row['Treatment_Code']?></td>
+                        <td><?=$row['Type']?></td>
+                        <td><?=$row['Date']?></td>
+                        <td><?=$row['Time']?></td>
                         <td>
                             <a href="#row-edit-<?=$row_count?>" class="btn btn-info data-row-toggle">Edit</a>
-                            <a href="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>?delete=<?=$row['Bed_ID']?>" class="btn btn-danger">Delete</a>
+                            <a href="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>?delete=<?=$row['Treatment_Code']?>" class="btn btn-danger">Delete</a>
                         </td>
                     </tr>
                     <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
-                        <tr id="row-edit-<?=$row_count?>" class="update-row <?=$row['Availability']?: 'table-danger'?>">
+                        <tr id="row-edit-<?=$row_count?>" class="update-row">
                             <td>
-                                <?=$row['Bed_ID']?>
+                                <?=$row['Treatment_Code']?>
                                 <label>
-                                    <input type="hidden" class="form-control" name="bedId" value="<?=$row['Bed_ID']?>">
+                                    <input type="hidden" class="form-control" name="Val1" value="<?=$row['Treatment_Code']?>">
                                 </label>
                             </td>
                             <td>
                                 <label>
-                                    <input type="text" class="form-control" name="wardId" value="<?=$row['Ward_ID']?>">
+                                    <input type="text" class="form-control" name="Val2" value="<?=$row['Type']?>">
                                 </label>
                             </td>
                             <td>
-                                <div class="btn-group" role="group" aria-label="Update availability">
-                                    <input type="radio" class="btn-check" name="available" id="upt-av<?=$row_count*2-1?>" autocomplete="off" value="1" <?=$row['Availability']? 'checked':''?>>
-                                    <label class="btn btn-outline-primary" for="upt-av<?=$row_count*2-1?>">Yes</label>
-
-                                    <input type="radio" class="btn-check" name="available" id="upt-av<?=$row_count*2?>" autocomplete="off" value="0" <?=$row['Availability']?: 'checked'?>>
-                                    <label class="btn btn-outline-primary" for="upt-av<?=$row_count*2?>">No</label>
-                                </div>
+                                <label>
+                                    <input type="date" class="form-control" name="Val3" value="<?=$row['Date']?>">
+                                </label>
+                            </td>
+                            <td>
+                                <label>
+                                    <input type="time" class="form-control" name="Val4" value="<?=$row['Time']?>">
+                                </label>
                             </td>
                             <td>
                                 <button type="submit" class="btn btn-success" name="btnUpdate">Done</button>
@@ -203,22 +188,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <tr id="row-add" class="add-row table-info">
                         <td>
                             <label>
-                                <input type="text" class="form-control" name="bedId"">
+                                <input type="text" class="form-control" name="Val1"">
                             </label>
                         </td>
                         <td>
                             <label>
-                                <input type="text" class="form-control" name="wardId"">
+                                <input type="text" class="form-control" name="Val2"">
                             </label>
                         </td>
                         <td>
-                            <div class="btn-group" role="group" aria-label="Select availability">
-                                <input type="radio" class="btn-check" name="available" id="add-av1" autocomplete="off" value="1" checked>
-                                <label class="btn btn-outline-primary" for="add-av1">Yes</label>
-
-                                <input type="radio" class="btn-check" name="available" id="add-av2" autocomplete="off" value="0">
-                                <label class="btn btn-outline-primary" for="add-av2">No</label>
-                            </div>
+                            <label>
+                                <input type="date" class="form-control" name="Val3">
+                            </label>
+                        </td>
+                        <td>
+                            <label>
+                                <input type="time" class="form-control" name="Val4">
+                            </label>
                         </td>
                         <td>
                             <button type="submit" class="btn btn-success" name="btnAdd">Done</button>
@@ -236,3 +222,4 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </div>
 </body>
 </html>
+

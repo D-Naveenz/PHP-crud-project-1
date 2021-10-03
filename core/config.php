@@ -1,4 +1,7 @@
 <?php
+// start the session
+session_start();
+
 // Application constraints
 const max_id_nums = 4;
 
@@ -46,23 +49,6 @@ function nextId($table, $id_col_name, $prefix) {
     return null;
 }
 
-function AvailableBeds(): array
-{
-    $database = createMySQLConn();
-    $available_beds = array();
-    $sql = "SELECT `Bed_ID` FROM `bed` WHERE `Availability` = 1";
-    $result = $database->query($sql);
-
-    if ($result->num_rows > 0) {
-        // output data of each row
-        $count = 0;
-        while ($row = $result->fetch_assoc()) {
-            $available_beds[$count++] = $row["Bed_ID"];
-        }
-    }
-    return $available_beds;
-}
-
 function isDateTimeStrNull(string $date_time_str): ?string
 {
     if ($date_time_str == "0000-00-00" || $date_time_str == "00-00") return null;
@@ -78,4 +64,15 @@ function getAbsUrl(): string
         $url .= "?".$query;
     }
     return $url;
+}
+
+function generateInfoMsg(mysqli|mysqli_stmt $mysqli_var, bool $result, $record_type, $id, $action) {
+    if ($result) {
+        // reporting
+        $_SESSION['res_msg'] = "The record of the ".$record_type." (id: $id) has been $action.";
+        $_SESSION['res_msg_type'] = "success";
+    } else {
+        $_SESSION['res_msg'] = "The record couldn't be $action. Error: $mysqli_var->error";
+        $_SESSION['res_msg_type'] = "danger";
+    }
 }
