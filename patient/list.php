@@ -5,6 +5,8 @@
  * GitHub: https://github.com/D-Naveenz
  */
 require_once "../core/config.php";
+require_once "Emergency.php";
+require_once "Record.php";
 
 // generate session variables to locate the current page
 $_SESSION['previous_page'] = getAbsUrl();
@@ -21,11 +23,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_POST['btnView'])) {
         // reload the page
         header("Location: view.php");
-    }
-
-    if (isset($_POST['btnUpdate'])) {
+    } elseif (isset($_POST['btnUpdate'])) {
         // reload the page
         header("Location: edit.php?update");
+    } elseif (isset($_POST['btnDelete'])) {
+        $temp_p = new Patient($_GET['id']);
+
+        if ($temp_p->isInPatient()) {
+            // create new in-patient object from the parent object
+            $temp_p = new InPatient($_SESSION['patient_id']);
+            $temp_p->insurance->deleteRow();
+            // purge all data before delete the record
+            Emergency::deleteAll($_SESSION['patient_id']);
+            Record::deleteAll($_SESSION['patient_id']);
+        } else {
+            // create new out-patient object with the same name
+            $temp_p = new OutPatient($_SESSION['patient_id']);
+        }
+
+        // delete the record
+        $temp_p->deleteRow();
     }
 }
 ?>
@@ -138,7 +155,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </div>
     <div class="container">
         <a href="edit.php?New" class="btn btn-info btn-block" id="btn-add">Add</a>
-        <a href="<?php echo $_SESSION['previous_page']; ?>" class="btn btn-secondary btn-block">Close</a>
+        <a href="../employee/main.php" class="btn btn-secondary btn-block">Close</a>
     </div>
 </div>
 </body>

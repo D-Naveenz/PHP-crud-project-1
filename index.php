@@ -15,11 +15,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $pass = $_POST['password'];
 
         $_SESSION['patient_id'] = $_POST['userid'];
-        //header("Location: ./patient/edit.php?update");
-        //header("Location: ./patient/edit.php");
-        header("Location: ./patient/list.php");
-        //header("Location: pages/beds.php");
-        //header("Location: ./diags.php");
+        //header("Location: patient/list.php");
+        header("Location: employee/main.php");
     }
 }
 ?>

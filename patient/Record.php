@@ -107,6 +107,17 @@ class Record
         $sql_statement->close();
     }
 
+    public static function deleteAll($id) {
+        $database = createMySQLConn();
+        $sql = "DELETE FROM patient_record WHERE patient_record.Patient_ID = ?";
+        $sql_statement = $database->prepare($sql);
+        // bind param with references : https://www.php.net/manual/en/language.references.whatare.php
+        $sql_statement->bind_param("s", $id);
+        // Execution
+        $sql_statement->execute();
+        $sql_statement->close();
+    }
+
     //Relation: patient_symptoms
     private function sympFind($pId, $date, $time): ?array
     {

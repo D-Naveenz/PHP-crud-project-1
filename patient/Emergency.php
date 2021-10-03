@@ -52,6 +52,18 @@ class Emergency
         $sql_statement->execute();
         $sql_statement->close();
     }
+
+    public static function deleteAll($id) {
+        $database = createMySQLConn();
+        $sql = "DELETE FROM emergency_contact WHERE emergency_contact.Patient_ID = ?";
+        $sql_statement = $database->prepare($sql);
+        // bind param with references : https://www.php.net/manual/en/language.references.whatare.php
+        $sql_statement->bind_param("s", $id);
+        // Execution
+        $sql_statement->execute();
+        $sql_statement->close();
+    }
+
     public static function findAll($id): ?array
     {
         $database = createMySQLConn();

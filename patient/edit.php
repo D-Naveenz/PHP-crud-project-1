@@ -403,7 +403,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <button type="submit" class="btn btn-success btn-block" id="btn-pt-update" name="btnPtUpdate">
                         Update
                     </button>
-                    <a href="<?=$_SESSION["previous_page"]?>" class="btn btn-primary">Close</a>
+                    <a href="list.php" class="btn btn-primary">Close</a>
                 </div>
             </form>
         </div>
