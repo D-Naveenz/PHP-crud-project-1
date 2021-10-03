@@ -2,7 +2,6 @@
 require_once "../core/config.php";
 require_once "Insurance.php";
 require_once "Emergency.php";
-require_once "InSubscriber.php";
 require_once "Record.php";
 
 final class InPatient extends Patient
@@ -15,7 +14,6 @@ final class InPatient extends Patient
     public string $bed_id;
     public ?Insurance $insurance;
     public ?array $emergency;
-    public ?array $in_subs;
     public ?array $records;
 
     // private variables
@@ -39,7 +37,6 @@ final class InPatient extends Patient
             $this->bed_id = $result['Bed_ID'];
             $this->insurance = Insurance::Build($pid);
             $this->emergency = Emergency::findAll($pid);
-            $this->in_subs = InSubscriber::findAll($pid);
             $this->records = Record::findAll($pid);
         }
         else {
@@ -50,7 +47,7 @@ final class InPatient extends Patient
             $this->dis_time = null;
             $this->pc_doc = "";
             $this->bed_id = "";
-            $this->insurance = new Insurance();
+            $this->insurance = new Insurance($pid);
         }
     }
 

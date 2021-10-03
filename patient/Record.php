@@ -32,9 +32,11 @@ class Record
      */
     public function getSymptoms(): string
     {
-        $result = "";
-        foreach ($this->symptoms as $symp) {
-            $result = $result.", ".$symp;
+        $result = $this->symptoms[0];
+        if (count($this->symptoms) > 1) {
+            for ($i = 1; $i < count($this->symptoms); $i++) {
+                $result = $result.", ".$this->symptoms[$i];
+            }
         }
         return $result;
     }
@@ -72,7 +74,7 @@ class Record
 
     public function insertToDb() {
         $database = createMySQLConn();
-        $sql = "INSERT INTO patient_record (Patient_ID, Nurse_ID, Date, Time, Weight, Blood_Preasure, Pulse, Temperature) VALUES (?,?,?,?,?,?,?,?)";
+        $sql = "INSERT INTO patient_record (Patient_ID, Nurse_ID, Date, Time, Weight, Blood_Pressure, Pulse, Temperature) VALUES (?,?,?,?,?,?,?,?)";
         $sql_statement = $database->prepare($sql);
         // bind param with references : https://www.php.net/manual/en/language.references.whatare.php
         $sql_statement->bind_param("ssssdsii", $this->patient_id, $this->nurse_id, $this->date, $this->time, $this->weight, $this->pressure, $this->pulse, $this->temperature);
@@ -84,7 +86,7 @@ class Record
 
     public function updateRow() {
         $database = createMySQLConn();
-        $sql = "UPDATE patient_record SET Nurse_ID = ?, Weight = ?, Blood_Preasure = ?, Pulse = ?, Temperature = ? WHERE patient_record.Patient_ID = ? AND patient_record.Date = ? AND patient_record.Time = ?";
+        $sql = "UPDATE `patient_record` SET `Nurse_ID` = ?, `Weight` = ?, `Blood_Pressure` = ?, `Pulse` = ?, `Temperature` = ? WHERE `patient_record`.`Patient_ID` = ? AND `patient_record`.`Date` = ? AND `patient_record`.`Time` = ?";
         $sql_statement = $database->prepare($sql);
         // bind param with references : https://www.php.net/manual/en/language.references.whatare.php
         $sql_statement->bind_param("sdsiisss", $this->nurse_id, $this->weight, $this->pressure, $this->pulse, $this->temperature, $this->patient_id, $this->date, $this->time);
@@ -94,12 +96,12 @@ class Record
         $this->sympUpdate();
     }
 
-    public function deleteRow() {
+    public static function deleteRow($id, $date, $time) {
         $database = createMySQLConn();
         $sql = "DELETE FROM patient_record WHERE patient_record.Patient_ID = ? AND patient_record.Date = ? AND patient_record.Time = ?";
         $sql_statement = $database->prepare($sql);
         // bind param with references : https://www.php.net/manual/en/language.references.whatare.php
-        $sql_statement->bind_param("s", $this->patient_id, $this->date, $this->time);
+        $sql_statement->bind_param("sss", $id, $date, $time);
         // Execution
         $sql_statement->execute();
         $sql_statement->close();
@@ -109,7 +111,7 @@ class Record
     private function sympFind($pId, $date, $time): ?array
     {
         $database = createMySQLConn();
-        $result = $database->query("SELECT * FROM patient_symptoms WHERE `Patient_ID` = '$pId' AND `Date` = $date AND `Time` = $time");
+        $result = $database->query("SELECT * FROM patient_symptoms WHERE `Patient_ID` = '$pId' AND `Date` = '$date' AND `Time` = '$time'");
         if ($result) {
             // output data of each row
             $objArray = array();
@@ -147,7 +149,7 @@ class Record
         $sql = "DELETE FROM patient_symptoms WHERE patient_symptoms.Patient_ID = ? AND patient_symptoms.Date = ? AND patient_symptoms.Time = ?";
         $sql_statement = $database->prepare($sql);
         // bind param with references : https://www.php.net/manual/en/language.references.whatare.php
-        $sql_statement->bind_param("s", $this->patient_id, $this->date, $this->time);
+        $sql_statement->bind_param("sss", $this->patient_id, $this->date, $this->time);
         // Execution
         $sql_statement->execute();
         $sql_statement->close();
