@@ -2,7 +2,7 @@
 /*
  * PHP CRUD Template v1.0
  * Developed by Naveen Dharmathunga
- * GitHub: https://github.com/D-Naveenz
+ * GitHub: https://github.com/D-Naveenz/hospital-crud-project
  */
 require_once "edit-helper.php";
 
