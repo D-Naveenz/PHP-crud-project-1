@@ -27,7 +27,7 @@ if (isset($_SESSION['patient_id'])) {
     // form is preparing to update the patient record
     $patient = load_patient($_SESSION['patient_id']);
 } else {
-
+    die("Please log in to see details");
 }
 ?>
 

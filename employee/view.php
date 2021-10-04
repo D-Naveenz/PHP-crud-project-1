@@ -162,6 +162,5 @@ if (isset($_SESSION['target_emp_id'])) {
     </div>
     <!-- Employee Content -->
 </div>
-</div>
 </body>
 </html>

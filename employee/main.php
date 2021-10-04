@@ -3,6 +3,12 @@ require_once "../core/config.php";
 
 // generate session variables to locate the current page
 $_SESSION['previous_page'] = getAbsUrl();
+
+// Connect to the database
+$database = createMySQLConn();
+$employee_count = $database->query("SELECT * FROM `employee`")->num_rows;
+$patients_count = $database->query("SELECT * FROM `patient`")->num_rows;
+
 ?>
 
 <!doctype html>
@@ -34,19 +40,25 @@ $_SESSION['previous_page'] = getAbsUrl();
 </div>
 <div class="container-fluid">
     <div class="container" style="margin-top: 20px">
-        <div class="row justify-content-center">
-            <a href="../patient/list.php">Patients List</a>
-            <a href="../employee/list.php">Employee List</a>
-            <a href="../pages/beds.php">Beds</a>
-            <a href="../pages/diags.php">Diagrams</a>
-            <a href="../pages/diagunits.php">Diagnosis Units</a>
-            <a href="../pages/drugs.php">Drugs</a>
-            <a href="../pages/pcus.php">Patient Care Units</a>
-            <a href="../pages/supplies.php">Supplies</a>
-            <a href="../pages/tests.php">Tests</a>
-            <a href="../pages/treatments.php">Treatments</a>
-            <a href="../pages/vendors.php">Vendors</a>
-            <a href="../pages/wards.php">Wards</a>
+        <div class="list-group" style="width: 40%">
+            <a href="../patient/list.php" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" aria-current="true">
+                View Patients list
+                <span class="badge bg-primary rounded-pill"><?=$patients_count?></span>
+            </a>
+            <a href="../employee/list.php" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                View Employee list
+                <span class="badge bg-primary rounded-pill"><?=$employee_count?></span>
+            </a>
+            <a href="../pages/beds.php" class="list-group-item list-group-item-action">Beds</a>
+            <a href="../pages/diags.php" class="list-group-item list-group-item-action">Diagrams</a>
+            <a href="../pages/diagunits.php" class="list-group-item list-group-item-action">Diagnosis Units</a>
+            <a href="../pages/drugs.php" class="list-group-item list-group-item-action">Drugs</a>
+            <a href="../pages/pcus.php" class="list-group-item list-group-item-action">Patient Care Units</a>
+            <a href="../pages/supplies.php" class="list-group-item list-group-item-action">Supplies</a>
+            <a href="../pages/tests.php" class="list-group-item list-group-item-action">Tests</a>
+            <a href="../pages/treatments.php" class="list-group-item list-group-item-action">Treatments</a>
+            <a href="../pages/vendors.php" class="list-group-item list-group-item-action">Vendors</a>
+            <a href="../pages/wards.php" class="list-group-item list-group-item-action">Wards</a>
         </div>
     </div>
 </div>
