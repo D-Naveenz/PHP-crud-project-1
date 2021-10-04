@@ -28,21 +28,24 @@ class Record
     }
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getSymptoms(): string
     {
-        $result = $this->symptoms[0];
-        if (count($this->symptoms) > 1) {
-            for ($i = 1; $i < count($this->symptoms); $i++) {
-                $result = $result.", ".$this->symptoms[$i];
+        if ($this->symptoms) {
+            $result = $this->symptoms[0];
+            if (count($this->symptoms) > 1) {
+                for ($i = 1; $i < count($this->symptoms); $i++) {
+                    $result = $result.", ".$this->symptoms[$i];
+                }
             }
+            return $result;
         }
-        return $result;
+        return "";
     }
 
     /**
-     * @param array $symptoms
+     * @param string $symptoms_str
      */
     public function setSymptoms(string $symptoms_str): void
     {

@@ -27,7 +27,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // reload the page
         header("Location: edit.php?update");
     } elseif (isset($_POST['btnDelete'])) {
-        $temp_p = new Patient($_GET['id']);
+        $temp_p = new Patient($_SESSION['patient_id']);
 
         if ($temp_p->isInPatient()) {
             // create new in-patient object from the parent object

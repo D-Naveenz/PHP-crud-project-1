@@ -4,7 +4,7 @@
  * Developed by Naveen Dharmathunga
  * GitHub: https://github.com/D-Naveenz
  */
-require_once "../core/config.php";
+require_once "edit-helper.php";
 
 // generate session variables to locate the current page
 $_SESSION['previous_page'] = getAbsUrl();
@@ -12,6 +12,30 @@ $_SESSION['previous_page'] = getAbsUrl();
 // Connect to the database
 $database = createMySQLConn();
 $res_select = $database->query("SELECT * FROM `employee`");
+
+// delete target employee id if exists
+if (isset($_SESSION['target_emp_id'])) {
+    unset($_SESSION['target_emp_id']);
+}
+
+// Post requests
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // save patient id in the session
+    $_SESSION['target_emp_id'] = $_POST['Val1'];
+
+    if (isset($_POST['btnView'])) {
+        // reload the page
+        header("Location: view.php");
+    } elseif (isset($_POST['btnUpdate'])) {
+        // reload the page
+        header("Location: edit.php?update");
+    } elseif (isset($_POST['btnDelete'])) {
+        $tmp_emp = load_employee($_SESSION['target_emp_id']);
+
+        // delete the record
+        $tmp_emp->deleteRow();
+    }
+}
 ?>
 
 <!doctype html>

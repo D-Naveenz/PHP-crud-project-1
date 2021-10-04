@@ -1,57 +1,17 @@
 <?php
 
-require_once "Employee.php";
-require_once "Medical.php";
-require_once "NonMedical.php";
-require_once "Doctor.php";
-require_once "Nurse.php";
-require_once "Attendant.php";
-require_once "Cleaner.php";
-
-function load_employee($id): Doctor|Nurse|Attendant|Cleaner|null
-{
-    // form is preparing to update the employee record
-    $employee = new Employee($id);
-    if ($employee->isExistsInDb()) {
-        if ($employee->isMedical()) {
-            // create new medical object from the parent object
-            $employee = new Medical($employee->getEmpNo());
-            if ($employee->isDoctor()) {
-                // create new doctor object from the parent object
-                $employee = new Doctor($employee->getEmpNo());
-            } else {
-                // create new nurse object from the parent object
-                $employee = new Nurse($employee->getEmpNo());
-            }
-        } else {
-            // create new non-medical object with the same name
-            $employee = new NonMedical($employee->getEmpNo());
-            if ($employee->isCleaner()) {
-                // create new cleaner object with the same name
-                $employee = new Cleaner($employee->getEmpNo());
-            } else {
-                // create new attendant object with the same name
-                $employee = new Attendant($employee->getEmpNo());
-            }
-        }
-        return $employee;
-    } else {
-        // redirect to previous page
-        header("Location: " . $_SESSION['previous_page']);
-        return null;
-    }
-}
+require_once "edit-helper.php";
 
 // store session data with checking get requests
 if (isset($_GET['update'])) {
     // form is preparing to update the employee record
-    $employee = load_employee($_SESSION['employee_id']);
+    $employee = load_employee($_SESSION['target_emp_id']);
 } elseif (isset($_GET['new'])) {
     // form is preparing to create the employee record
     $employee = new Employee();
 } else {
     // form is loading the current state
-    $employee = load_employee($_SESSION['employee_id']);
+    $employee = load_employee($_SESSION['target_emp_id']);
 }
 
 // global variables
@@ -63,7 +23,7 @@ if (isset($_GET['delete'])) {
     $tmp_emp->deleteRow();
 
     // reload the page
-    header("Location: ".$_SERVER["PHP_SELF"]."?update");
+    header("Location: " . $_SERVER["PHP_SELF"] . "?update");
 }
 
 // Post requests
@@ -105,7 +65,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $employee = $tmp_emp;
 
     // reload the page
-    header("Location: ".$_SERVER["PHP_SELF"]."?update");
+    header("Location: " . $_SERVER["PHP_SELF"] . "?update");
 }
 
 ?>
@@ -131,123 +91,120 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     <!-- Custom Javascript -->
     <script type="text/javascript">
-        function medicalEvent(trigger) {
-            // hide / disable forms when change the radio button
-            if (trigger) {
-                // disable toolbar
-                $('.tb-non-medical').prop('disabled', true);
-                $('.tb-medical').prop('disabled', false);
-                // hide non-medical sections
+        // hide / disable forms when change the radio button
+        function medicalEvent() {
+            if ($('#rad-medical').is(':checked')) {
+                // change radio buttons
+                if (!$('#rad-nurse').is(':checked')) {
+                    $('#rad-doc').prop('checked', true);
+                }
+                $(".non-medical").prop('disabled', true);
+                $(".medical").prop('disabled', false);
+                // show medical sections
+                $('#emp-medi').show("slow");
+            } else {
+                // change radio buttons
+                if (!$('#rad-attendant').is(':checked')) {
+                    $('#rad-cleaner').prop('checked', true);
+                }
+                $(".non-medical").prop('disabled', false);
+                $(".medical").prop('disabled', true);
+                // hide medical sections
+                $('#emp-medi').hide("slow");
+            }
+        }
+
+        function subEvent() {
+            if ($('#rad-doc').is(':checked')) {
+                // show doctor sub section
+                $('#emp-doc').show("slow");
                 $('#emp-cl').hide("slow");
                 $('#emp-att').hide("slow");
-                // show non-medical sections
-                $('#emp-medi').show("slow");
-                // Add value
-                $('#emp-type').val("Medical");
-            } else {
-                // disable toolbar
-                $('.tb-medical').prop('disabled', true);
-                $('.tb-non-medical').prop('disabled', false);
-                // show non-medical sections
-                $('#emp-cl').show("slow");
-                $('#emp-att').show("slow");
-                // hide non-medical sections
-                $('#emp-medi').hide("slow");
-                // Add value
-                $('#emp-type').val("Nonmedical");
-            }
-        }
-
-        function docEvent(trigger) {
-            // hide / disable forms when change the radio button
-            if (trigger) {
-                // show doctor section
-                $('#emp-doc').show("slow");
-                // Add value
-                $('#sub-type').val("Doctor");
-            } else {
-                // hide doctor section
+            } else if ($('#rad-nurse').is(':checked')) {
+                // hide all sub sections
                 $('#emp-doc').hide("slow");
-                // Add value
-                $('#sub-type').val("Nurse");
-            }
-        }
-
-        function cleanerEvent(trigger) {
-            // hide / disable forms when change the radio button
-            if (trigger) {
-                // show cleaner section
+                $('#emp-cl').hide("slow");
+                $('#emp-att').hide("slow");
+            } else if ($('#rad-cleaner').is(':checked')) {
+                // show cleaner sub section
+                $('#emp-doc').hide("slow");
                 $('#emp-cl').show("slow");
                 $('#emp-att').hide("slow");
-                // Add value
-                $('#sub-type-type').val("Cleaner");
             } else {
-                // hide cleaner section
+                // show attendant sub section
                 $('#emp-doc').hide("slow");
+                $('#emp-cl').hide("slow");
                 $('#emp-att').show("slow");
-                // Add value
-                $('#sub-type-type').val("Attendant");
             }
         }
 
         window.onload = () => {
-            medicalEvent(true);
-            docEvent(true);
-
             <?php if (isset($_GET['update'])): ?>
             // Initializing form elements according to the update request
             // hide save button
             $('#btn-emp-create').hide();
 
             <?php if ($employee instanceof Medical): ?>
-                medicalEvent(true);
-                // Medical details
-                $('#txtMedi1').val("<?= $employee->mc_reg_no ?>");
-                $('#txtMedi2').val("<?= $employee->joined ?>");
-                $('#txtMedi3').val("<?= $employee->getResigned() ?>");
-                <?php if ($employee instanceof Doctor): ?>
-                    docEvent(true);
-                    $('#txtDoc1').val("<?= $employee->dea?>");
-                    $('#txtDoc2').val("<?= $employee->special ?>");
-                <?php else: ?>
-                    docEvent(false);
-                <?php endif; ?>
-            <?php elseif ($employee instanceof Cleaner): ?>
-                cleanerEvent(true);
-                $('#txtCl1').val("<?= $employee->contact ?>");
-                $('#txtCl2').val("<?= $employee->start ?>");
-                $('#txtCl3').val("<?= $employee->end ?>");
-            <?php elseif ($employee instanceof Attendant): ?>
-                cleanerEvent(false);
-                $('#txtAtt1').val("<?= $employee->hr_rate ?>");
+            $('#rad-medical').prop('checked', true);
+            // Medical details
+            $('#txtMedi1').val("<?= $employee->mc_reg_no ?>");
+            $('#txtMedi2').val("<?= $employee->joined ?>");
+            $('#txtMedi3').val("<?= $employee->getResigned() ?>");
+            <?php if ($employee instanceof Doctor): ?>
+            $('#rad-doc').prop('checked', true);
+            $('#txtDoc1').val("<?= $employee->dea?>");
+            $('#txtDoc2').val("<?= $employee->special ?>");
+            <?php else: ?>
+            $('#rad-nurse').prop('checked', true);
             <?php endif; ?>
+            <?php elseif ($employee instanceof Cleaner): ?>
+            $('#rad-cleaner').prop('checked', true);
+            $('#txtCl1').val("<?= $employee->contact ?>");
+            $('#txtCl2').val("<?= $employee->start ?>");
+            $('#txtCl3').val("<?= $employee->end ?>");
+            <?php elseif ($employee instanceof Attendant): ?>
+            $('#rad-attendant').prop('checked', true);
+            $('#txtAtt1').val("<?= $employee->hr_rate ?>");
+            <?php endif; ?>
+            // disable toolbar
+            medicalEvent();
+            subEvent();
+            $('#button-bar input:radio').prop('disabled', true);
             <?php endif; ?>
         };
 
 
         $(document).ready(function () {
-            $('#toolbar-medical').click(function () {
-                medicalEvent(true);
+            medicalEvent();
+            subEvent();
+            // hide update button
+            $('#btn-emp-update').hide();
+
+            // Get today's date
+            function today() {
+                let currentDate = new Date();
+                return currentDate.getFullYear() +
+                    "-" + (((currentDate.getMonth()) + 1) < 10 ? '0' : '') + ((currentDate.getMonth()) + 1) +
+                    "-" + (currentDate.getDate() < 10 ? '0' : '') + currentDate.getDate();
+            }
+
+            // Medical / Non-medical event handler
+            $('input:radio[name="empType"]').change(() => {
+                medicalEvent();
+                subEvent();
+            });
+
+            // Sub type event handler
+            $('input:radio[name="subType"]').change(() => {
+                subEvent();
+            });
+
+            $('#btnMedi2').click(() => {
+                $('#txtMedi2').val(today());
             })
 
-            $('#toolbar-non-medical').click(function () {
-                medicalEvent(false);
-            })
-
-            $('#toolbar-Doc').click(function () {
-                docEvent(true);
-            })
-
-            $('#toolbar-Nurse').click(function () {
-                docEvent(false);
-            })
-
-            $('#toolbar-Cleaner').click(function () {
-                cleanerEvent(true);
-            })
-
-            $('#toolbar-Attendant').click(function () {
-                cleanerEvent(false);
+            $('#btnCl2').click(() => {
+                $('#txtCl2').val(today());
             })
         });
     </script>
@@ -258,7 +215,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <body>
 <!-- Body Header -->
 <div class="container-fluid p-5 bg-primary text-white text-center">
-    <?php if (isset($_GET['update']) && !empty($_GET['update'])): ?>
+    <?php if (isset($_GET['update'])): ?>
         <h1>Update <?= $employee->name ?></h1>
     <?php else: ?>
         <h1>Add New Employee</h1>
@@ -267,34 +224,47 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </div>
 <div class="container-fluid">
     <div class="container" style="margin-top: 20px;">
-        <div class="container p-4">
-            <div class="btn-toolbar" role="toolbar" aria-label="Employee Job Status">
-                <div class="btn-group me-2" role="group" aria-label="Employee Type">
-                    <button type="button" class="btn btn-primary tb-employee" id="toolbar-medical">Medical</button>
-                    <button type="button" class="btn btn-primary tb-employee" id="toolbar-non-medical">Non-medical</button>
-                </div>
-                <div class="btn-group me-2" role="group" aria-label="Medical Type">
-                    <button type="button" class="btn btn-info tb-medical" id="toolbar-Doc">Doctor</button>
-                    <button type="button" class="btn btn-info tb-medical" id="toolbar-Nurse">Nurse</button>
-                </div>
-                <div class="btn-group" role="group" aria-label="Non-medical Type">
-                    <button type="button" class="btn btn-warning tb-non-medical" id="toolbar-Cleaner">Cleaner</button>
-                    <button type="button" class="btn btn-warning tb-non-medical" id="toolbar-Attendant">Attendant</button>
-                </div>
-            </div>
-        </div>
-
         <!-- Employee Content -->
         <div class="container">
             <form action="<?= htmlspecialchars($_SERVER['PHP_SELF']) ?>" method="post">
                 <!-- Employee Relation -->
                 <div class="container" id="emp-info">
                     <div class="mb-3">
-                        <h2>Employee information</h2>
+                        <h2>Employee Information</h2>
                         <input type="hidden" name="Val-1-1-1" value="<?php echo $employee->getEmpNo(); ?>" required/>
-                        <input type="hidden" name="Val-1-1-2" id="emp-type" required/>
-                        <input type="hidden" name="Val-1-1-3" id="sub-type" required/>
                     </div>
+
+                    <!-- Toggle buttons -->
+                    <div class="d-flex flex-row mb-3 align-items-center" id="button-bar">
+                        <div class="btn-group me-2" role="group" aria-label="Employee Job Status">
+                            <input type="radio" class="btn-check" name="empType" id="rad-medical" autocomplete="off"
+                                   value="Medical" checked>
+                            <label class="btn btn-outline-primary" for="rad-medical">Medical</label>
+
+                            <input type="radio" class="btn-check" name="empType" id="rad-non-medical" autocomplete="off"
+                                   value="Non medical">
+                            <label class="btn btn-outline-primary" for="rad-non-medical">Non-Medical</label>
+                        </div>
+                        <div class="btn-group" role="group" aria-label="Medical Type">
+                            <input type="radio" class="btn-check medical" name="subType" id="rad-doc" autocomplete="off"
+                                   value="Doctor" checked>
+                            <label class="btn btn-outline-info" for="rad-doc">Doctor</label>
+
+                            <input type="radio" class="btn-check medical" name="subType" id="rad-nurse"
+                                   autocomplete="off" value="Nurse">
+                            <label class="btn btn-outline-info" for="rad-nurse">Nurse</label>
+
+                            <input type="radio" class="btn-check non-medical" name="subType" id="rad-cleaner"
+                                   autocomplete="off" value="Cleaner">
+                            <label class="btn btn-outline-warning" for="rad-cleaner">Cleaner</label>
+
+                            <input type="radio" class="btn-check non-medical" name="subType" id="rad-attendant"
+                                   autocomplete="off" value="Attendant">
+                            <label class="btn btn-outline-warning" for="rad-attendant">Attendant</label>
+                        </div>
+                    </div>
+                    <!-- Toggle buttons -->
+
                     <div class="mb-3">
                         <label class="form-label" for="empNo">Employee No</label>
                         <div class="input-group mb-3" id="pt-id-field">
@@ -302,34 +272,35 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <input type="text" class="form-control"
                                    id="empNo"
                                    placeholder="Employee Number will be generated automatically"
-                                   aria-label="Employee Number will be generated automatically" aria-describedby="txtPt1"
-                                   value="<?=$employee->getEmpNoNums()?>" readonly/>
+                                   aria-label="Employee Number will be generated automatically"
+                                   aria-describedby="txtPt1"
+                                   value="<?= $employee->getEmpNoNums() ?>" readonly/>
                         </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label" for="txtEmp2">Password</label>
                         <input type="text" class="form-control" name="Val-1-2" id="txtEmp2"
-                               value="<?=$employee->password?>">
+                               value="<?= $employee->password ?>">
                     </div>
                     <div class="mb-3">
                         <label class="form-label" for="txtEmp3">Name</label>
                         <input type="text" class="form-control" name="Val-1-3" id="txtEmp3"
-                               value="<?=$employee->name?>">
+                               value="<?= $employee->name ?>">
                     </div>
                     <div class="mb-3">
                         <label class="form-label" for="txtEmp4">Address</label>
                         <input type="text" class="form-control" name="Val-1-4" id="txtEmp4"
-                               value="<?=$employee->address?>">
+                               value="<?= $employee->address ?>">
                     </div>
                     <div class="mb-3">
                         <label class="form-label" for="txtEmp5">Contact Number</label>
                         <input type="text" class="form-control" name="Val-1-3" id="txtEmp5"
-                               value="<?=$employee->contact?>">
+                               value="<?= $employee->contact ?>">
                     </div>
                     <div class="mb-3">
                         <label class="form-label" for="txtEmp6">Working Status</label>
                         <input type="text" class="form-control" name="Val-1-3" id="txtEmp6"
-                               value="<?=$employee->status?>">
+                               value="<?= $employee->status ?>">
                     </div>
                 </div>
                 <!-- Employee Relation -->
@@ -346,7 +317,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <span class="input-group-text">Date: </span>
                             <input type="date" class="form-control primary-key" name="Val-2-2" id="txtMedi2"
                                    placeholder="Date">
-                            <button class="btn btn-outline-secondary" type="button" id="btnMedi2">Today</button>
+                            <button class="btn btn-outline-secondary btn-today" type="button" id="btnMedi2">Today
+                            </button>
                         </div>
                     </div>
                     <div class="mb-3">
@@ -384,7 +356,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <span class="input-group-text">Date: </span>
                             <input type="date" class="form-control primary-key" name="Val-4-2" id="txtCl2"
                                    placeholder="Date">
-                            <button class="btn btn-outline-secondary" type="button" id="btnCl2">Today</button>
+                            <button class="btn btn-outline-secondary btn-today" type="button" id="btnCl2">Today</button>
                         </div>
                     </div>
                     <div class="mb-3">

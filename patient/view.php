@@ -23,13 +23,11 @@ function load_patient($id): InPatient|OutPatient|null
     }
 }
 
-// store session data with checking get requests
 if (isset($_SESSION['patient_id'])) {
     // form is preparing to update the patient record
     $patient = load_patient($_SESSION['patient_id']);
 } else {
-    // redirect to previous page
-    header("Location: " . $_SESSION['previous_page']);
+
 }
 ?>
 
@@ -57,6 +55,7 @@ if (isset($_SESSION['patient_id'])) {
     <h1>Patient Profile</h1>
     <p>Suwa Sahana Hospital</p>
 </div>
+<!-- Body Header -->
 
 <div class="container-fluid" style="margin-top: 20px;" id="nav-patient">
     <?php if ($patient instanceof InPatient): ?>

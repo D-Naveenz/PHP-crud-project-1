@@ -1,6 +1,6 @@
 <?php
 
-class Cleaner extends NonMedical
+final class Cleaner extends NonMedical
 {
 
     public int $contract;

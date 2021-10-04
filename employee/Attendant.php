@@ -14,7 +14,7 @@ final class Attendant extends NonMedical
             $this->hr_rate = $result['HourlyRate'];
         }
         else {
-            $this->hr_rate = "";
+            $this->hr_rate = 0.00;
         }
     }
 
