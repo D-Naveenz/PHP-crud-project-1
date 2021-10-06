@@ -26,7 +26,6 @@ function createMySQLConn() {
 // Get the next id from the table
 function nextId($table, $id_col_name, $prefix) {
     $hospitalDB = createMySQLConn();
-    $pev_id = 0;
 
     // Get the id from last record of the table
     $result = $hospitalDB->query("SELECT $id_col_name FROM $table ORDER BY $id_col_name DESC LIMIT 1;");

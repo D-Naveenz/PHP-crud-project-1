@@ -154,7 +154,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </div>
     </div>
     <div class="container-fluid">
-        <a href="edit.php?New" class="btn btn-info btn-block" id="btn-add">Add</a>
+        <a href="edit.php?new" class="btn btn-info btn-block" id="btn-add">Add</a>
         <a href="../employee/main.php" class="btn btn-secondary btn-block">Close</a>
     </div>
 </div>

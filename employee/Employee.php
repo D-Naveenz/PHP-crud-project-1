@@ -37,7 +37,7 @@ class Employee
             else $this->exists_in_db = false;
         } else {
             if ($id == "") {
-                $this->emp_no = nextId('patient', 'Patient_ID', self::id_prefix);
+                $this->emp_no = nextId('employee', 'EmpNo', self::id_prefix);
             } else {
                 $this->emp_no = "";
             }
